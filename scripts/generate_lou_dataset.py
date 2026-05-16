@@ -39,6 +39,18 @@ DATASET_COLUMNS = [
 ]
 
 
+def materialize_runtime_playbooks() -> dict[str, Any]:
+    import importlib.util
+
+    module_path = ROOT / "scripts" / "materialize_runtime_playbooks.py"
+    spec = importlib.util.spec_from_file_location("materialize_runtime_playbooks", module_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Could not load runtime playbook materializer.")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.materialize()
+
+
 def load_env_file() -> dict[str, str]:
     values: dict[str, str] = {}
     if API_KEYS.exists():
@@ -201,11 +213,13 @@ def main() -> None:
         print(f"Pioneer generation failed: {error}", file=sys.stderr)
         raise SystemExit(1) from error
     write_artifacts(rows, raw_batches, args.model)
+    runtime = materialize_runtime_playbooks()
     print(
         json.dumps(
             {
                 "provider": "pioneer",
                 "rows": len(rows),
+                "runtime_playbooks": runtime["playbooks"],
                 "dataset": str(DATASET_JSONL),
                 "workbook": str(PLAYBOOK_XLSX),
                 "request": str(PIONEER_REQUEST),

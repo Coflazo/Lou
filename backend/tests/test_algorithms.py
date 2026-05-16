@@ -3,12 +3,12 @@ from __future__ import annotations
 import math
 
 from app.algorithms.clause_matching import ClauseMatcher
-from app.algorithms.company_brain import CompanyBrainGraph
+from app.algorithms.company_brain import CompanyBrainMindMap
 from app.algorithms.risk_scoring import BayesianRiskScorer, RiskObservation
 from app.algorithms.section_detector import HMMSectionDetector
 from app.algorithms.semantic_search import SemanticSearchEngine
 from app.algorithms.voice_matching import VoiceMatcher
-from app.models import PlaybookPosition
+from app.models import Playbook, PlaybookPosition
 
 
 def _make_positions() -> list[PlaybookPosition]:
@@ -44,6 +44,23 @@ def _make_positions() -> list[PlaybookPosition]:
             columns={},
         ),
     ]
+
+
+def _make_playbook(playbook_id: str = "pb", name: str = "Standard NDA Playbook") -> Playbook:
+    positions = _make_positions()
+    for position in positions:
+        position.playbook_id = playbook_id
+    return Playbook(
+        id=playbook_id,
+        slug=playbook_id,
+        name=name,
+        category="NDA",
+        description="Demo playbook",
+        owner="Legal Ops",
+        version=1,
+        columns=["Topic", "Preferred Position", "Fallback 1", "Red Line", "Deal Breaker"],
+        positions=positions,
+    )
 
 
 def test_clause_matcher_returns_top_k_with_cosine_in_unit_interval():
@@ -141,23 +158,30 @@ def test_semantic_search_falls_back_to_bm25_without_openai_key():
     assert hits[0].method == "bm25"
 
 
-def test_company_brain_emits_metrics_and_node_payload():
-    brain = CompanyBrainGraph()
-    snapshot = brain.compute(
-        entities=[
-            {"id": "a", "label": "A", "kind": "team"},
-            {"id": "b", "label": "B", "kind": "policy"},
-            {"id": "c", "label": "C", "kind": "vendor"},
-        ],
-        relations=[
-            {"source": "a", "target": "b", "weight": 0.6},
-            {"source": "b", "target": "c", "weight": 0.4},
+def test_company_brain_emits_playbook_first_mm_style_tree():
+    brain = CompanyBrainMindMap()
+    snapshot = brain.from_playbooks(
+        [
+            _make_playbook("pb-nda", "Standard NDA Playbook"),
+            _make_playbook("pb-dpa", "Supplier DPA Playbook"),
         ],
         use_cache=False,
     )
     ids = {node["id"] for node in snapshot.nodes}
-    assert ids == {"a", "b", "c"}
-    assert snapshot.metrics["node_count"] == 3
-    assert snapshot.metrics["edge_count"] == 2
-    assert 0.0 <= snapshot.metrics["density"] <= 1.0
-    assert all("pagerank" in node for node in snapshot.nodes)
+    assert {"company-brain", "pb-nda", "pb-dpa"}.issubset(ids)
+    assert snapshot.tree["name"] == "Company Brain"
+    assert snapshot.tree["type"] == "branch"
+    assert snapshot.tree["children"]
+    assert snapshot.tree["children"][0]["kind"] == "playbook"
+    assert snapshot.tree["children"][0]["children"][0]["kind"] == "topic"
+    assert all(node["type"] in {"branch", "leaf"} for node in snapshot.nodes)
+
+
+def test_single_playbook_brain_expands_topics_into_negotiation_logic():
+    brain = CompanyBrainMindMap()
+    snapshot = brain.from_playbook(_make_playbook())
+    first_topic = snapshot.tree["children"][0]
+    child_names = {child["name"] for child in first_topic["children"]}
+    assert snapshot.tree["kind"] == "playbook"
+    assert first_topic["kind"] == "topic"
+    assert {"Preferred", "Fallback"}.issubset(child_names)

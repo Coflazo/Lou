@@ -130,40 +130,85 @@ def pioneer_chat(messages: list[dict[str, str]], model: str, api_key: str, max_t
 
 
 def generate_playbook_specs(count: int, model: str, api_key: str) -> tuple[list[dict[str, str]], dict[str, Any]]:
-    messages = [
-        {
-            "role": "system",
-            "content": "Return strict JSON only. No markdown. No extra keys.",
-        },
-        {
-            "role": "user",
-            "content": (
-                f"Generate {count} distinct commercial legal playbook specifications. "
-                "Each must be a different playbook, not just a topic. Cover NDAs, SaaS, DPA, AI vendors, security, "
-                "procurement, services, reseller, IP licensing, employment-adjacent commercial restrictions, cloud, "
-                "support SLAs, privacy, open source, escrow, audit, compliance, payments, termination, liability, "
-                "indemnity, export control, insurance, subcontracting, and public sector. "
-                'Return only {"playbooks":[{"name":"...","category":"...","description":"..."}]}.'
-            ),
-        },
-    ]
-    result = pioneer_chat(messages, model, api_key, max_tokens=8192)
-    playbooks = result["parsed"].get("playbooks", [])
-    if not isinstance(playbooks, list) or len(playbooks) != count:
-        raise ValueError(f"Pioneer returned {len(playbooks) if isinstance(playbooks, list) else 'invalid'} playbooks, expected {count}.")
     validated = []
     names = set()
-    for item in playbooks:
-        if not isinstance(item, dict):
-            raise ValueError("Pioneer returned invalid playbook spec.")
-        row = {key: str(item.get(key, "")).strip() for key in ["name", "category", "description"]}
-        if not all(row.values()):
-            raise ValueError("Pioneer returned an incomplete playbook spec.")
-        if row["name"].lower() in names:
-            raise ValueError(f"Duplicate playbook name: {row['name']}")
-        names.add(row["name"].lower())
-        validated.append(row)
-    return validated, result
+    attempts = []
+    request_index = 0
+    empty_attempts = 0
+    max_empty_attempts = 8
+    max_requests = max(10, count)
+
+    while len(validated) < count:
+        request_index += 1
+        if request_index > max_requests:
+            raise ValueError(f"Pioneer returned only {len(validated)} unique playbooks after {max_requests} requests, expected {count}.")
+
+        current = count - len(validated)
+        messages = [
+            {
+                "role": "system",
+                "content": "Return strict JSON only. No markdown. No extra keys.",
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"Generate {current} distinct commercial legal playbook specifications. "
+                    f"This is request {request_index}. Already accepted {len(validated)} of {count} playbooks. "
+                    f"Do not duplicate these accepted playbook names: {json.dumps(sorted(names))}. "
+                    "Each must be a different playbook, not just a topic. Cover NDAs, SaaS, DPA, AI vendors, security, "
+                    "procurement, services, reseller, IP licensing, employment-adjacent commercial restrictions, cloud, "
+                    "support SLAs, privacy, open source, escrow, audit, compliance, payments, termination, liability, "
+                    "indemnity, export control, insurance, subcontracting, and public sector. "
+                    'Return only {"playbooks":[{"name":"...","category":"...","description":"..."}]}.'
+                ),
+            },
+        ]
+        result = pioneer_chat(messages, model, api_key, max_tokens=8192)
+        playbooks = result["parsed"].get("playbooks", [])
+        received = len(playbooks) if isinstance(playbooks, list) else "invalid"
+        accepted = 0
+        if isinstance(playbooks, list):
+            for item in playbooks:
+                if not isinstance(item, dict):
+                    continue
+                row = {key: str(item.get(key, "")).strip() for key in ["name", "category", "description"]}
+                if not all(row.values()):
+                    continue
+                signature = row["name"].casefold()
+                if signature in names:
+                    continue
+                names.add(signature)
+                validated.append(row)
+                accepted += 1
+                if len(validated) >= count:
+                    break
+        attempts.append(
+            {
+                "request": request_index,
+                "requested": current,
+                "received": received,
+                "accepted": accepted,
+                "response": result["parsed"],
+            }
+        )
+        if accepted == 0:
+            empty_attempts += 1
+            if empty_attempts >= max_empty_attempts:
+                raise ValueError(f"Pioneer stopped producing unique playbooks after {len(validated)} of {count}.")
+            print(
+                f"[pioneer] playbook specs returned no usable items; retrying {empty_attempts}/{max_empty_attempts}",
+                file=sys.stderr,
+            )
+        else:
+            empty_attempts = 0
+            if accepted < current:
+                print(
+                    f"[pioneer] accepted {accepted}/{current} playbook specs; requesting the remaining specs",
+                    file=sys.stderr,
+                )
+        time.sleep(0.25)
+
+    return validated[:count], {"attempts": attempts}
 
 
 def generate_rows_for_playbook(

@@ -62,10 +62,6 @@ class Settings(BaseSettings):
     HMM_TRANSITION_INSIDE_TO_INSIDE: float = 0.90
     HMM_TRANSITION_BEGIN_TO_BEGIN: float = 0.70
 
-    PAGERANK_DAMPING: float = 0.85
-    PAGERANK_TOLERANCE: float = 1e-6
-    PAGERANK_MAX_ITERATIONS: int = 200
-
     BRAIN_CACHE_TTL_SECONDS: int = 300
 
     @field_validator("CORS_ORIGINS", "VOICE_LANGUAGES", "RISK_LEVELS", mode="before")

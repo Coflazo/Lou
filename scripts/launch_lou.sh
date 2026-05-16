@@ -96,6 +96,8 @@ if [[ ! -f demo-data/lou-pioneer-playbook-datasets-50.jsonl ]]; then
 else
   log "Using existing Pioneer playbook dataset"
 fi
+log "Materializing runtime playbooks"
+python scripts/materialize_runtime_playbooks.py >/dev/null
 
 log "Running backend tests"
 python -m pytest backend/tests/test_lou_flows.py

@@ -71,7 +71,7 @@ export function ContractUploadPage() {
                 playbooks.data?.map((playbook) => ({
                   value: playbook.id,
                   label: playbook.name,
-                  description: `${playbook.category} · v${playbook.version}`,
+                  description: playbook.category,
                 })) ?? []
               }
             />

@@ -15,94 +15,94 @@
       "response": {
         "items": [
           {
-            "Topic": "NDA Scope",
-            "Preferred Position": "Confidentiality limited to specific defined information.",
-            "Fallback 1": "Confidentiality limited to information explicitly identified in the agreement.",
-            "Fallback 2": "Confidentiality limited to information provided in writing.",
-            "Fallback 3": "Confidentiality limited to information shared during meetings.",
-            "Red Line": "Confidentiality includes all information exchanged during discussions.",
-            "Deal Breaker": "Confidentiality includes all information, including non-disclosure of sensitive internal processes."
+            "Topic": "NDA Confidentiality Scope",
+            "Preferred Position": "Confidential information includes all non-public data, including internal strategies and customer lists.",
+            "Fallback 1": "Confidential information includes all non-public data, excluding customer lists.",
+            "Fallback 2": "Confidential information includes all non-public data, excluding internal strategies.",
+            "Fallback 3": "Confidential information includes all non-public data, excluding customer lists and internal strategies.",
+            "Red Line": "Confidential information includes all non-public data, including internal strategies, customer lists, and financial records.",
+            "Deal Breaker": "Confidential information includes all non-public data, including internal strategies, customer lists, financial records, and proprietary algorithms."
           },
           {
-            "Topic": "SaaS Termination Notice Period",
-            "Preferred Position": "30-day written notice period with automatic renewal unless terminated.",
-            "Fallback 1": "30-day written notice period with automatic renewal unless terminated.",
-            "Fallback 2": "15-day written notice period with automatic renewal unless terminated.",
-            "Fallback 3": "7-day written notice period with automatic renewal unless terminated.",
-            "Red Line": "No notice period required for termination.",
-            "Deal Breaker": "Termination without notice or penalty."
-          },
-          {
-            "Topic": "Data Processing Compliance",
-            "Preferred Position": "Compliance with GDPR and CCPA standards.",
-            "Fallback 1": "Compliance with GDPR and other applicable data protection laws.",
-            "Fallback 2": "Compliance with minimum data protection standards.",
-            "Fallback 3": "Compliance with basic data protection requirements.",
-            "Red Line": "No data protection obligations imposed on the vendor.",
-            "Deal Breaker": "Data processing without any legal compliance requirements."
-          },
-          {
-            "Topic": "Security Incident Response",
-            "Preferred Position": "72-hour notification of security incidents with full disclosure.",
-            "Fallback 1": "48-hour notification of security incidents with partial disclosure.",
-            "Fallback 2": "24-hour notification of security incidents with limited disclosure.",
-            "Fallback 3": "Notification within 12 hours with no disclosure required.",
-            "Red Line": "No obligation to notify of security incidents.",
-            "Deal Breaker": "No obligation to notify or remediate security incidents."
-          },
-          {
-            "Topic": "IP Ownership",
-            "Preferred Position": "All IP developed during the engagement belongs to the client.",
-            "Fallback 1": "IP developed during the engagement is owned by the client unless otherwise agreed.",
-            "Fallback 2": "IP developed during the engagement is owned by the client, with exceptions for third-party IP.",
-            "Fallback 3": "IP developed during the engagement is owned by the client, with limited exceptions.",
-            "Red Line": "IP ownership is not specified or transferred.",
-            "Deal Breaker": "IP ownership remains with the vendor."
-          },
-          {
-            "Topic": "Procurement Terms",
-            "Preferred Position": "Fixed-price contract with clear deliverables and payment milestones.",
-            "Fallback 1": "Fixed-price contract with clear deliverables and payment milestones.",
-            "Fallback 2": "Fixed-price contract with clear deliverables and no payment milestones.",
-            "Fallback 3": "Fixed-price contract with limited deliverables and no payment milestones.",
-            "Red Line": "No fixed-price terms or deliverables defined.",
-            "Deal Breaker": "No contract terms defined or agreed upon."
+            "Topic": "SaaS Data Processing",
+            "Preferred Position": "Data processing is limited to the scope of the service provided and does not include third-party sharing without consent.",
+            "Fallback 1": "Data processing is limited to the scope of the service provided and does not include third-party sharing without explicit consent.",
+            "Fallback 2": "Data processing is limited to the scope of the service provided and does not include third-party sharing.",
+            "Fallback 3": "Data processing is limited to the scope of the service provided.",
+            "Red Line": "Data processing includes all data handling activities, including third-party sharing without consent.",
+            "Deal Breaker": "Data processing includes all data handling activities, including third-party sharing without consent and without prior notice."
           },
           {
             "Topic": "AI Vendor Terms",
-            "Preferred Position": "AI models are trained on non-sensitive, anonymized data only.",
-            "Fallback 1": "AI models are trained on non-sensitive data with limited anonymization.",
-            "Fallback 2": "AI models are trained on non-sensitive data with minimal anonymization.",
-            "Fallback 3": "AI models are trained on non-sensitive data with no anonymization.",
-            "Red Line": "AI models are trained on any data without restrictions.",
-            "Deal Breaker": "AI models are trained on any data, including sensitive and personal information."
+            "Preferred Position": "AI model training includes only customer data provided for the purpose of the service.",
+            "Fallback 1": "AI model training includes only customer data provided for the purpose of the service, excluding sensitive personal information.",
+            "Fallback 2": "AI model training includes only customer data provided for the purpose of the service, excluding personally identifiable information.",
+            "Fallback 3": "AI model training includes only customer data provided for the purpose of the service, excluding non-sensitive data.",
+            "Red Line": "AI model training includes all customer data, including sensitive personal information.",
+            "Deal Breaker": "AI model training includes all customer data, including sensitive personal information, and may be used for unrelated purposes."
           },
           {
-            "Topic": "Professional Services Scope",
-            "Preferred Position": "Scope defined in detail with deliverables and timelines.",
-            "Fallback 1": "Scope defined in detail with deliverables but no timelines.",
-            "Fallback 2": "Scope defined with general deliverables and timelines.",
-            "Fallback 3": "Scope defined with limited deliverables and timelines.",
-            "Red Line": "Scope not defined or agreed upon.",
-            "Deal Breaker": "No defined scope or deliverables."
+            "Topic": "IP Ownership in SaaS",
+            "Preferred Position": "All IP developed during the engagement is owned by the client, including source code and documentation.",
+            "Fallback 1": "All IP developed during the engagement is owned by the client, including source code, but not documentation.",
+            "Fallback 2": "All IP developed during the engagement is owned by the client, including documentation, but not source code.",
+            "Fallback 3": "All IP developed during the engagement is owned by the client, excluding any IP developed by the vendor.",
+            "Red Line": "All IP developed during the engagement is owned by the vendor, including source code and documentation.",
+            "Deal Breaker": "All IP developed during the engagement is owned by the vendor, including source code, documentation, and any derivative works."
           },
           {
-            "Topic": "Enterprise Software Licensing",
-            "Preferred Position": "Licensing based on user count with annual renewal options.",
-            "Fallback 1": "Licensing based on user count with annual renewal options.",
-            "Fallback 2": "Licensing based on user count with no renewal options.",
-            "Fallback 3": "Licensing based on user count with limited renewal options.",
-            "Red Line": "Licensing based on usage with no user count restrictions.",
-            "Deal Breaker": "Licensing based on usage with no user count or renewal options."
+            "Topic": "Professional Services Contract Term",
+            "Preferred Position": "Term is for a fixed period of 12 months with an option to renew for an additional 12 months.",
+            "Fallback 1": "Term is for a fixed period of 12 months with an option to renew for an additional 6 months.",
+            "Fallback 2": "Term is for a fixed period of 12 months with an option to renew for an additional 3 months.",
+            "Fallback 3": "Term is for a fixed period of 12 months with no renewal option.",
+            "Red Line": "Term is for a fixed period of 12 months with no renewal option and no notice period.",
+            "Deal Breaker": "Term is for a fixed period of 12 months with no renewal option, no notice period, and no right to terminate."
           },
           {
-            "Topic": "Data Residency Requirements",
-            "Preferred Position": "Data stored within the EU and subject to EU data protection laws.",
-            "Fallback 1": "Data stored within the EU or other specified regions.",
-            "Fallback 2": "Data stored within the EU or other regions with minimal restrictions.",
-            "Fallback 3": "Data stored within the EU or other regions with no restrictions.",
-            "Red Line": "Data stored outside of the EU with no restrictions.",
-            "Deal Breaker": "Data stored anywhere without restrictions."
+            "Topic": "Enterprise Software Security Requirements",
+            "Preferred Position": "All software must meet ISO 27001 security standards and undergo annual penetration testing.",
+            "Fallback 1": "All software must meet ISO 27001 security standards and undergo bi-annual penetration testing.",
+            "Fallback 2": "All software must meet ISO 27001 security standards and undergo annual security audits.",
+            "Fallback 3": "All software must meet ISO 27001 security standards.",
+            "Red Line": "All software must meet ISO 27001 security standards and undergo quarterly security audits.",
+            "Deal Breaker": "All software must meet ISO 27001 security standards and undergo no security audits or testing."
+          },
+          {
+            "Topic": "Data Processing Agreement Compliance",
+            "Preferred Position": "Data processing complies with GDPR and CCPA, with regular audits and data breach notifications.",
+            "Fallback 1": "Data processing complies with GDPR and CCPA, with regular audits.",
+            "Fallback 2": "Data processing complies with GDPR and CCPA, with data breach notifications.",
+            "Fallback 3": "Data processing complies with GDPR and CCPA.",
+            "Red Line": "Data processing complies with GDPR and CCPA, but no audits or breach notifications are required.",
+            "Deal Breaker": "Data processing complies with GDPR and CCPA, but no audits, breach notifications, or data protection impact assessments are required."
+          },
+          {
+            "Topic": "Procurement Contract Term Limits",
+            "Preferred Position": "Term is limited to the duration of the project with a 30-day termination notice period.",
+            "Fallback 1": "Term is limited to the duration of the project with a 15-day termination notice period.",
+            "Fallback 2": "Term is limited to the duration of the project with a 7-day termination notice period.",
+            "Fallback 3": "Term is limited to the duration of the project with no termination notice period.",
+            "Red Line": "Term is limited to the duration of the project with no termination notice period and no right to terminate.",
+            "Deal Breaker": "Term is limited to the duration of the project with no termination notice period, no right to terminate, and no exit clauses."
+          },
+          {
+            "Topic": "Security Incident Response Plan",
+            "Preferred Position": "The vendor must provide a 24/7 security incident response team and notify the client within 2 hours of a breach.",
+            "Fallback 1": "The vendor must provide a 24/7 security incident response team and notify the client within 4 hours of a breach.",
+            "Fallback 2": "The vendor must provide a 24/7 security incident response team and notify the client within 8 hours of a breach.",
+            "Fallback 3": "The vendor must provide a 24/7 security incident response team and notify the client within 12 hours of a breach.",
+            "Red Line": "The vendor must provide a 24/7 security incident response team and notify the client within 24 hours of a breach.",
+            "Deal Breaker": "The vendor must provide a 24/7 security incident response team and notify the client within 72 hours of a breach."
+          },
+          {
+            "Topic": "IP Licensing in AI Models",
+            "Preferred Position": "Licensing includes all AI models, training data, and associated algorithms for commercial use.",
+            "Fallback 1": "Licensing includes all AI models and associated algorithms for commercial use, excluding training data.",
+            "Fallback 2": "Licensing includes all AI models for commercial use, excluding training data and associated algorithms.",
+            "Fallback 3": "Licensing includes all AI models for commercial use, excluding training data, associated algorithms, and derivative works.",
+            "Red Line": "Licensing includes all AI models, training data, and associated algorithms for non-commercial use only.",
+            "Deal Breaker": "Licensing includes all AI models, training data, and associated algorithms for non-commercial use only and no commercial use is permitted."
           }
         ]
       }
@@ -123,93 +123,93 @@
         "items": [
           {
             "Topic": "NDA Mutual Non-Disclosure",
-            "Preferred Position": "Confidentiality obligations apply to all disclosed information, including trade secrets, and remain in effect for 5 years.",
-            "Fallback 1": "Confidentiality obligations apply to all disclosed information, including trade secrets, and remain in effect for 3 years.",
-            "Fallback 2": "Confidentiality obligations apply to all disclosed information, but the duration is negotiable.",
-            "Fallback 3": "Confidentiality obligations apply only to information explicitly marked as confidential.",
-            "Red Line": "Confidentiality obligations do not apply to any information disclosed during the term of the agreement.",
-            "Deal Breaker": "Confidentiality obligations do not apply to any information and the other party is not bound by any duty of confidentiality."
+            "Preferred Position": "Both parties agree to mutual non-disclosure of all confidential information exchanged during negotiations.",
+            "Fallback 1": "Confidentiality is limited to information disclosed by the other party.",
+            "Fallback 2": "Confidentiality applies only to information disclosed in writing.",
+            "Fallback 3": "Confidentiality is limited to information disclosed in the course of business.",
+            "Red Line": "Confidentiality must extend to all information exchanged, including verbal communications.",
+            "Deal Breaker": "Disclosure of any information is permitted without restriction."
           },
           {
-            "Topic": "SaaS Data Ownership",
-            "Preferred Position": "Customer retains ownership of all data processed by the SaaS platform, including derivative data.",
-            "Fallback 1": "Customer retains ownership of all data processed by the SaaS platform, including derivative data, but the provider may retain copies for backup purposes.",
-            "Fallback 2": "Customer retains ownership of all data processed by the SaaS platform, but the provider may retain copies for backup purposes.",
-            "Fallback 3": "Customer retains ownership of all data processed by the SaaS platform, but the provider may retain copies for operational use.",
-            "Red Line": "Customer does not retain ownership of any data processed by the SaaS platform.",
-            "Deal Breaker": "Customer does not retain ownership of any data and the provider owns all data processed through the platform."
+            "Topic": "SaaS Service Level Agreement",
+            "Preferred Position": "Service level objectives are defined with clear performance metrics and penalties for non-compliance.",
+            "Fallback 1": "Service level objectives are defined with performance metrics but no penalties.",
+            "Fallback 2": "Service level objectives are outlined but not quantified.",
+            "Fallback 3": "Service level expectations are general and not specified.",
+            "Red Line": "Performance metrics must include penalties for non-compliance and service credits.",
+            "Deal Breaker": "No service level objectives or performance metrics are required."
           },
           {
-            "Topic": "Data Processing Agreement Scope",
-            "Preferred Position": "The agreement applies to all data processing activities, including third-party data transfers and subprocessing.",
-            "Fallback 1": "The agreement applies to all data processing activities, including third-party data transfers, but not subprocessing.",
-            "Fallback 2": "The agreement applies to all data processing activities, but subprocessing is subject to additional approval.",
-            "Fallback 3": "The agreement applies to all data processing activities, but subprocessing is not explicitly covered.",
-            "Red Line": "The agreement does not apply to any data processing activities outside of the initial scope.",
-            "Deal Breaker": "The agreement does not apply to any data processing activities and the provider is not bound by any obligations."
+            "Topic": "Data Processing Agreement",
+            "Preferred Position": "Data processing is limited to the specific purposes outlined in the agreement.",
+            "Fallback 1": "Data processing is limited to the purposes reasonably necessary for the service provided.",
+            "Fallback 2": "Data processing is permitted for any purpose related to the service.",
+            "Fallback 3": "Data processing is allowed without restriction.",
+            "Red Line": "Data processing must include explicit consent from data subjects for all uses.",
+            "Deal Breaker": "Data can be processed for any purpose without consent or restriction."
           },
           {
-            "Topic": "Security Incident Response",
-            "Preferred Position": "The provider must notify the customer of any security incident within 24 hours and provide a detailed incident report within 7 days.",
-            "Fallback 1": "The provider must notify the customer of any security incident within 48 hours and provide a detailed incident report within 14 days.",
-            "Fallback 2": "The provider must notify the customer of any security incident within 72 hours and provide a detailed incident report within 30 days.",
-            "Fallback 3": "The provider must notify the customer of any security incident within 7 days and provide a detailed incident report within 60 days.",
-            "Red Line": "The provider is not required to notify the customer of any security incidents.",
-            "Deal Breaker": "The provider is not required to notify the customer of any security incidents and is not bound by any incident response obligations."
+            "Topic": "Security Compliance Requirements",
+            "Preferred Position": "The service provider must comply with ISO 27001 and SOC 2 standards.",
+            "Fallback 1": "The service provider must comply with at least one of ISO 27001 or SOC 2 standards.",
+            "Fallback 2": "The service provider must implement basic security controls as outlined in the agreement.",
+            "Fallback 3": "The service provider must provide a general security policy.",
+            "Red Line": "The service provider must provide third-party audit reports for all security measures.",
+            "Deal Breaker": "No security requirements or audits are required."
           },
           {
-            "Topic": "IP Assignment in Procurement",
-            "Preferred Position": "All IP developed by the vendor during the performance of the contract is assigned to the customer.",
-            "Fallback 1": "All IP developed by the vendor during the performance of the contract is assigned to the customer, but the vendor retains rights to use the IP for its own purposes.",
-            "Fallback 2": "All IP developed by the vendor during the performance of the contract is assigned to the customer, but the vendor may retain non-exclusive rights for internal use.",
-            "Fallback 3": "All IP developed by the vendor during the performance of the contract is assigned to the customer, but the vendor may retain rights to use the IP for its own purposes.",
-            "Red Line": "The vendor is not required to assign any IP developed during the performance of the contract.",
-            "Deal Breaker": "The vendor is not required to assign any IP and retains all rights to any IP developed during the performance of the contract."
+            "Topic": "IP Ownership in AI Vendor Terms",
+            "Preferred Position": "All intellectual property developed during the engagement is owned by the client.",
+            "Fallback 1": "IP developed during the engagement is owned by the client unless otherwise agreed.",
+            "Fallback 2": "IP developed during the engagement is jointly owned by both parties.",
+            "Fallback 3": "IP developed during the engagement is owned by the vendor unless specified otherwise.",
+            "Red Line": "IP ownership must be determined by a third-party IP audit.",
+            "Deal Breaker": "IP ownership is not specified and defaults to vendor ownership."
           },
           {
-            "Topic": "AI Vendor Model Usage Rights",
-            "Preferred Position": "The customer has exclusive rights to use the AI model for the agreed purpose, and the vendor may not use the model for any other purpose.",
-            "Fallback 1": "The customer has exclusive rights to use the AI model for the agreed purpose, but the vendor may use the model for research and development purposes.",
-            "Fallback 2": "The customer has exclusive rights to use the AI model for the agreed purpose, but the vendor may use the model for non-commercial purposes.",
-            "Fallback 3": "The customer has exclusive rights to use the AI model for the agreed purpose, but the vendor may use the model for internal testing.",
-            "Red Line": "The customer does not have exclusive rights to use the AI model and the vendor may use the model for any purpose.",
-            "Deal Breaker": "The customer does not have exclusive rights to use the AI model and the vendor may use the model for any purpose, including commercial use."
-          },
-          {
-            "Topic": "Professional Services Contract Term",
-            "Preferred Position": "The contract term is for 12 months with automatic renewal unless terminated 60 days in advance.",
-            "Fallback 1": "The contract term is for 12 months with automatic renewal unless terminated 90 days in advance.",
-            "Fallback 2": "The contract term is for 12 months with automatic renewal unless terminated 180 days in advance.",
-            "Fallback 3": "The contract term is for 12 months with automatic renewal unless terminated 365 days in advance.",
-            "Red Line": "The contract term is for 12 months with no automatic renewal and no termination notice required.",
-            "Deal Breaker": "The contract term is for 12 months with no automatic renewal and the customer may terminate the contract at any time without notice."
+            "Topic": "Professional Services Termination Clause",
+            "Preferred Position": "Either party may terminate the agreement with 30 days' written notice.",
+            "Fallback 1": "Either party may terminate the agreement with 15 days' written notice.",
+            "Fallback 2": "Either party may terminate the agreement with 7 days' written notice.",
+            "Fallback 3": "Either party may terminate the agreement without notice.",
+            "Red Line": "Termination requires a court order or mutual agreement.",
+            "Deal Breaker": "Termination is not permitted under any circumstances."
           },
           {
             "Topic": "Enterprise Software Customization Rights",
-            "Preferred Position": "The customer has the right to customize the software to meet its specific business needs, with no restrictions on the scope of customization.",
-            "Fallback 1": "The customer has the right to customize the software to meet its specific business needs, but the vendor may impose reasonable restrictions on the scope of customization.",
-            "Fallback 2": "The customer has the right to customize the software to meet its specific business needs, but the vendor may require approval for major customizations.",
-            "Fallback 3": "The customer has the right to customize the software to meet its specific business needs, but the vendor may require a fee for customizations.",
-            "Red Line": "The customer does not have the right to customize the software and the vendor may impose restrictions on any customizations.",
-            "Deal Breaker": "The customer does not have the right to customize the software and the vendor may impose restrictions on all customizations, including internal use."
+            "Preferred Position": "The client retains full rights to customize the software as needed.",
+            "Fallback 1": "The client has limited rights to customize the software with vendor approval.",
+            "Fallback 2": "The client may request customizations but must pay additional fees.",
+            "Fallback 3": "Customizations are not permitted without significant approval processes.",
+            "Red Line": "Customization rights are limited to pre-approved features only.",
+            "Deal Breaker": "Customization is not allowed under any circumstances."
+          },
+          {
+            "Topic": "Procurement Contract Payment Terms",
+            "Preferred Position": "Payment is due within 15 days of receipt of invoice.",
+            "Fallback 1": "Payment is due within 30 days of receipt of invoice.",
+            "Fallback 2": "Payment is due within 60 days of receipt of invoice.",
+            "Fallback 3": "Payment terms are flexible and not specified.",
+            "Red Line": "Payment must be made within 7 days of receipt of invoice with interest for late payments.",
+            "Deal Breaker": "No payment terms are specified and payment is due upon delivery."
+          },
+          {
+            "Topic": "AI Vendor Data Access Controls",
+            "Preferred Position": "The vendor must implement strict access controls to protect client data.",
+            "Fallback 1": "The vendor must implement basic access controls to protect client data.",
+            "Fallback 2": "The vendor must provide access controls as outlined in the agreement.",
+            "Fallback 3": "The vendor may access data as needed without restrictions.",
+            "Red Line": "The vendor must provide a detailed access control policy and audit logs.",
+            "Deal Breaker": "The vendor has unrestricted access to all client data."
           },
           {
             "Topic": "Data Breach Notification Requirements",
-            "Preferred Position": "The vendor must notify the customer of any data breach within 24 hours and provide a detailed report within 7 days.",
-            "Fallback 1": "The vendor must notify the customer of any data breach within 48 hours and provide a detailed report within 14 days.",
-            "Fallback 2": "The vendor must notify the customer of any data breach within 72 hours and provide a detailed report within 30 days.",
-            "Fallback 3": "The vendor must notify the customer of any data breach within 7 days and provide a detailed report within 60 days.",
-            "Red Line": "The vendor is not required to notify the customer of any data breaches.",
-            "Deal Breaker": "The vendor is not required to notify the customer of any data breaches and is not bound by any breach notification obligations."
-          },
-          {
-            "Topic": "Third-Party Access to Customer Data",
-            "Preferred Position": "The vendor may not allow any third-party access to customer data without the customer's prior written consent.",
-            "Fallback 1": "The vendor may not allow any third-party access to customer data without the customer's prior written consent, but may share data with service providers for operational purposes.",
-            "Fallback 2": "The vendor may not allow any third-party access to customer data without the customer's prior written consent, but may share data with service providers for operational purposes with limited access.",
-            "Fallback 3": "The vendor may not allow any third-party access to customer data without the customer's prior written consent, but may share data with service providers for operational purposes with limited access and oversight.",
-            "Red Line": "The vendor may allow any third-party access to customer data without the customer's consent.",
-            "Deal Breaker": "The vendor may allow any third-party access to customer data without the customer's consent and is not bound by any restrictions on data sharing."
+            "Preferred Position": "The vendor must notify the client within 24 hours of discovering a data breach.",
+            "Fallback 1": "The vendor must notify the client within 48 hours of discovering a data breach.",
+            "Fallback 2": "The vendor must notify the client within 72 hours of discovering a data breach.",
+            "Fallback 3": "The vendor must notify the client within 7 days of discovering a data breach.",
+            "Red Line": "The vendor must provide a detailed breach report within 24 hours.",
+            "Deal Breaker": "The vendor is not required to notify the client of any data breaches."
           }
         ]
       }
@@ -229,94 +229,94 @@
       "response": {
         "items": [
           {
-            "Topic": "NDA Mutual Non-Disclosure",
-            "Preferred Position": "Both parties agree to mutual non-disclosure of all confidential information exchanged during negotiations.",
-            "Fallback 1": "Confidentiality applies only to the disclosing party's information.",
-            "Fallback 2": "Confidentiality is limited to information shared in written form.",
-            "Fallback 3": "Confidentiality applies only to information shared in the presence of both parties.",
-            "Red Line": "Confidentiality does not apply to information shared by the other party.",
-            "Deal Breaker": "No confidentiality obligations apply to either party."
+            "Topic": "NDA Scope",
+            "Preferred Position": "Confidentiality limited to proprietary information and trade secrets.",
+            "Fallback 1": "Confidentiality limited to information explicitly identified in the agreement.",
+            "Fallback 2": "Confidentiality limited to information exchanged during the term of the agreement.",
+            "Fallback 3": "Confidentiality limited to information relevant to the negotiation.",
+            "Red Line": "Confidentiality includes all information exchanged regardless of relevance.",
+            "Deal Breaker": "Confidentiality includes all information, including non-proprietary and public information."
           },
           {
-            "Topic": "SaaS Data Processing",
-            "Preferred Position": "The service provider must comply with all applicable data protection laws and regulations.",
-            "Fallback 1": "The service provider will comply with data protection laws in the jurisdiction where the data is processed.",
-            "Fallback 2": "The service provider will comply with data protection laws in the jurisdiction of the client.",
-            "Fallback 3": "The service provider will comply with data protection laws in the jurisdiction of the service provider.",
-            "Red Line": "The service provider is not required to comply with data protection laws.",
-            "Deal Breaker": "No data protection obligations apply to the service provider."
+            "Topic": "SaaS Data Ownership",
+            "Preferred Position": "Customer retains ownership of all data processed through the service.",
+            "Fallback 1": "Customer retains ownership of data processed through the service, excluding data generated by the service.",
+            "Fallback 2": "Customer retains ownership of data processed through the service, excluding data subject to third-party rights.",
+            "Fallback 3": "Customer retains ownership of data processed through the service, excluding data subject to service provider's intellectual property.",
+            "Red Line": "Service provider retains ownership of all data processed through the service.",
+            "Deal Breaker": "Service provider retains ownership of all data, including data generated by the customer."
           },
           {
-            "Topic": "AI Vendor Terms Model Ownership",
-            "Preferred Position": "The AI model developed by the vendor is owned by the client upon payment of the final milestone.",
-            "Fallback 1": "The AI model is owned by the client upon completion of the project.",
-            "Fallback 2": "The AI model is owned by the client upon acceptance of deliverables.",
-            "Fallback 3": "The AI model is owned by the client upon receipt of the final deliverable.",
-            "Red Line": "The AI model is owned by the vendor unless otherwise agreed in writing.",
-            "Deal Breaker": "The AI model is owned by the vendor and cannot be transferred to the client."
+            "Topic": "Data Processing Agreement",
+            "Preferred Position": "Processor is prohibited from using data for purposes other than those specified in the agreement.",
+            "Fallback 1": "Processor is prohibited from using data for purposes other than those specified in the agreement, excluding incidental use for system maintenance.",
+            "Fallback 2": "Processor is prohibited from using data for purposes other than those specified in the agreement, excluding use for legal compliance.",
+            "Fallback 3": "Processor is prohibited from using data for purposes other than those specified in the agreement, excluding use for audit purposes.",
+            "Red Line": "Processor is prohibited from using data for purposes other than those specified in the agreement, excluding use for any internal operations.",
+            "Deal Breaker": "Processor is authorized to use data for any purpose without restriction."
           },
           {
-            "Topic": "Professional Services IP Rights",
-            "Preferred Position": "All IP developed during the engagement is owned by the client.",
-            "Fallback 1": "All IP developed during the engagement is owned by the client unless otherwise agreed in writing.",
-            "Fallback 2": "All IP developed during the engagement is owned by the client, with appropriate attribution.",
-            "Fallback 3": "All IP developed during the engagement is owned by the client, with a right of use granted to the vendor.",
-            "Red Line": "The vendor retains ownership of all IP developed during the engagement.",
-            "Deal Breaker": "The vendor retains ownership of all IP and the client has no rights."
+            "Topic": "Security Compliance",
+            "Preferred Position": "Compliance with ISO 27001 and SOC 2 standards is required.",
+            "Fallback 1": "Compliance with ISO 27001 or SOC 2 standards is required.",
+            "Fallback 2": "Compliance with at least one of ISO 27001 or SOC 2 standards is required.",
+            "Fallback 3": "Compliance with a recognized information security standard is required.",
+            "Red Line": "Compliance with no specific security standards is required.",
+            "Deal Breaker": "Compliance with no security standards is required."
           },
           {
-            "Topic": "Enterprise Software Security Compliance",
-            "Preferred Position": "The software must comply with all applicable security standards and certifications.",
-            "Fallback 1": "The software must comply with the most relevant security standards and certifications.",
-            "Fallback 2": "The software must comply with a minimum set of security standards and certifications.",
-            "Fallback 3": "The software must comply with a baseline set of security standards and certifications.",
-            "Red Line": "The software is not required to comply with any security standards or certifications.",
-            "Deal Breaker": "The software may be used without any security compliance requirements."
+            "Topic": "IP Assignment",
+            "Preferred Position": "All IP developed during the engagement is assigned to the client.",
+            "Fallback 1": "All IP developed during the engagement is assigned to the client, excluding IP developed by third parties.",
+            "Fallback 2": "All IP developed during the engagement is assigned to the client, excluding IP developed using pre-existing client IP.",
+            "Fallback 3": "All IP developed during the engagement is assigned to the client, excluding IP developed using open-source software.",
+            "Red Line": "All IP developed during the engagement is assigned to the client, excluding IP developed using any third-party IP.",
+            "Deal Breaker": "No IP is assigned to the client."
           },
           {
-            "Topic": "Procurement Contract Term Limits",
-            "Preferred Position": "The contract term is limited to a maximum of three years with automatic renewal options.",
-            "Fallback 1": "The contract term is limited to a maximum of two years with automatic renewal options.",
-            "Fallback 2": "The contract term is limited to a maximum of one year with automatic renewal options.",
-            "Fallback 3": "The contract term is limited to a maximum of one year with no automatic renewal options.",
-            "Red Line": "The contract term is not limited and may be extended indefinitely.",
-            "Deal Breaker": "The contract has no term limit and may be extended indefinitely without notice."
+            "Topic": "Procurement Terms",
+            "Preferred Position": "Supplier agrees to provide services at the lowest commercially reasonable rate.",
+            "Fallback 1": "Supplier agrees to provide services at a rate not exceeding the market rate.",
+            "Fallback 2": "Supplier agrees to provide services at a rate not exceeding the average industry rate.",
+            "Fallback 3": "Supplier agrees to provide services at a rate not exceeding the supplier's standard rate.",
+            "Red Line": "Supplier agrees to provide services at a rate not exceeding the supplier's standard rate plus a 10% markup.",
+            "Deal Breaker": "Supplier agrees to provide services at a rate not exceeding the supplier's standard rate plus a 30% markup."
           },
           {
-            "Topic": "Data Processing Agreement Sub-Processing",
-            "Preferred Position": "The vendor must obtain prior written consent from the client before engaging any sub-processors.",
-            "Fallback 1": "The vendor must notify the client in writing before engaging any sub-processors.",
-            "Fallback 2": "The vendor may engage sub-processors with the client's approval.",
-            "Fallback 3": "The vendor may engage sub-processors with the client's consent.",
-            "Red Line": "The vendor may engage sub-processors without the client's consent.",
-            "Deal Breaker": "The vendor is not required to obtain the client's consent for sub-processing."
+            "Topic": "AI Vendor Terms",
+            "Preferred Position": "Vendor is prohibited from using customer data for training AI models without explicit consent.",
+            "Fallback 1": "Vendor is prohibited from using customer data for training AI models without explicit consent, excluding data used for model improvement.",
+            "Fallback 2": "Vendor is prohibited from using customer data for training AI models without explicit consent, excluding data used for performance analytics.",
+            "Fallback 3": "Vendor is prohibited from using customer data for training AI models without explicit consent, excluding data used for system optimization.",
+            "Red Line": "Vendor is prohibited from using customer data for training AI models without explicit consent, excluding data used for internal testing.",
+            "Deal Breaker": "Vendor is authorized to use customer data for training AI models without explicit consent."
           },
           {
-            "Topic": "IP Assignment in SaaS Development",
-            "Preferred Position": "All IP developed during the engagement is assigned to the client upon payment of the final milestone.",
-            "Fallback 1": "All IP developed during the engagement is assigned to the client upon completion of the project.",
-            "Fallback 2": "All IP developed during the engagement is assigned to the client upon acceptance of deliverables.",
-            "Fallback 3": "All IP developed during the engagement is assigned to the client upon receipt of the final deliverable.",
-            "Red Line": "The vendor retains ownership of all IP developed during the engagement.",
-            "Deal Breaker": "The vendor retains ownership of all IP and the client has no rights."
+            "Topic": "Professional Services Agreement",
+            "Preferred Position": "Client retains ownership of all deliverables and intellectual property created during the engagement.",
+            "Fallback 1": "Client retains ownership of all deliverables created during the engagement, excluding intellectual property developed by the vendor.",
+            "Fallback 2": "Client retains ownership of all deliverables created during the engagement, excluding intellectual property developed using pre-existing client IP.",
+            "Fallback 3": "Client retains ownership of all deliverables created during the engagement, excluding intellectual property developed using open-source software.",
+            "Red Line": "Client retains ownership of all deliverables created during the engagement, excluding intellectual property developed using any third-party IP.",
+            "Deal Breaker": "Client does not retain ownership of any deliverables or intellectual property."
           },
           {
-            "Topic": "AI Vendor Data Usage Restrictions",
-            "Preferred Position": "The vendor may use the client's data solely for the purpose of providing the AI service.",
-            "Fallback 1": "The vendor may use the client's data solely for the purpose of developing and improving the AI service.",
-            "Fallback 2": "The vendor may use the client's data for the purpose of providing and improving the AI service.",
-            "Fallback 3": "The vendor may use the client's data for the purpose of providing the AI service.",
-            "Red Line": "The vendor may use the client's data for any purpose.",
-            "Deal Breaker": "The vendor may use the client's data for any purpose without restriction."
+            "Topic": "Enterprise Software Licensing",
+            "Preferred Position": "License grants access to the software for all users within the organization.",
+            "Fallback 1": "License grants access to the software for all users within the organization, excluding third-party contractors.",
+            "Fallback 2": "License grants access to the software for all users within the organization, excluding remote employees.",
+            "Fallback 3": "License grants access to the software for all users within the organization, excluding seasonal employees.",
+            "Red Line": "License grants access to the software for all users within the organization, excluding employees on leave.",
+            "Deal Breaker": "License grants access to the software for no users."
           },
           {
-            "Topic": "Professional Services Termination Rights",
-            "Preferred Position": "The client may terminate the engagement with 30 days' written notice.",
-            "Fallback 1": "The client may terminate the engagement with 15 days' written notice.",
-            "Fallback 2": "The client may terminate the engagement with 7 days' written notice.",
-            "Fallback 3": "The client may terminate the engagement with 3 days' written notice.",
-            "Red Line": "The client may terminate the engagement with no notice.",
-            "Deal Breaker": "The client may not terminate the engagement under any circumstances."
+            "Topic": "Data Breach Notification",
+            "Preferred Position": "Notification of a data breach must occur within 72 hours of discovery.",
+            "Fallback 1": "Notification of a data breach must occur within 7 days of discovery.",
+            "Fallback 2": "Notification of a data breach must occur within 14 days of discovery.",
+            "Fallback 3": "Notification of a data breach must occur within 30 days of discovery.",
+            "Red Line": "Notification of a data breach must occur within 60 days of discovery.",
+            "Deal Breaker": "Notification of a data breach is not required."
           }
         ]
       }
@@ -337,93 +337,93 @@
         "items": [
           {
             "Topic": "NDA Mutual Non-Disclosure",
-            "Preferred Position": "Both parties agree to mutual non-disclosure with defined scope and duration.",
-            "Fallback 1": "One party agrees to non-disclosure with limited scope.",
-            "Fallback 2": "One party agrees to non-disclosure with no defined duration.",
-            "Fallback 3": "One party agrees to non-disclosure with no defined scope or duration.",
-            "Red Line": "Non-disclosure is required only for the disclosing party.",
-            "Deal Breaker": "No non-disclosure agreement is acceptable."
+            "Preferred Position": "Both parties agree to mutual non-disclosure of all confidential information exchanged during negotiations.",
+            "Fallback 1": "Confidentiality is limited to information disclosed by the other party.",
+            "Fallback 2": "Disclosure is permitted if necessary for legal compliance.",
+            "Fallback 3": "Non-disclosure is limited to information related to the subject matter of the agreement.",
+            "Red Line": "Confidentiality extends to all information, including internal business strategies.",
+            "Deal Breaker": "Disclosure of all information is permitted without restriction."
           },
           {
-            "Topic": "SaaS Data Processing",
-            "Preferred Position": "Data is processed in compliance with GDPR and CCPA standards.",
-            "Fallback 1": "Data is processed in compliance with GDPR standards.",
-            "Fallback 2": "Data is processed in compliance with basic data protection principles.",
-            "Fallback 3": "Data processing is not defined.",
-            "Red Line": "Data is processed without any legal compliance requirements.",
-            "Deal Breaker": "Data processing is prohibited without explicit user consent."
+            "Topic": "SaaS Service Level Agreement",
+            "Preferred Position": "Service availability is guaranteed at 99.9% uptime with monthly service credits for downtime.",
+            "Fallback 1": "Service availability is guaranteed at 99% uptime with monthly service credits for downtime.",
+            "Fallback 2": "Service availability is guaranteed at 95% uptime with no service credits.",
+            "Fallback 3": "Service availability is guaranteed at 90% uptime with no service credits.",
+            "Red Line": "Service availability is guaranteed at 100% uptime with no service credits.",
+            "Deal Breaker": "No service level guarantees are provided."
           },
           {
-            "Topic": "AI Vendor Terms",
-            "Preferred Position": "Vendor agrees to audit access and transparency on model training data.",
-            "Fallback 1": "Vendor agrees to audit access but not transparency on model training data.",
-            "Fallback 2": "Vendor agrees to limited audit access.",
-            "Fallback 3": "Vendor does not agree to any audit access.",
-            "Red Line": "Vendor refuses to allow any form of audit or transparency.",
-            "Deal Breaker": "Vendor denies access to model training data altogether."
+            "Topic": "Data Processing Agreement",
+            "Preferred Position": "Data processing is limited to the purposes specified in the agreement and compliance with GDPR and CCPA.",
+            "Fallback 1": "Data processing is limited to the purposes specified in the agreement and compliance with GDPR.",
+            "Fallback 2": "Data processing is limited to the purposes specified in the agreement and compliance with GDPR or CCPA.",
+            "Fallback 3": "Data processing is limited to the purposes specified in the agreement.",
+            "Red Line": "Data processing is permitted for any purpose without restriction.",
+            "Deal Breaker": "No data processing restrictions are applied."
           },
           {
-            "Topic": "Professional Services IP Ownership",
-            "Preferred Position": "All work product is owned by the client with full IP rights.",
-            "Fallback 1": "All work product is owned by the client with limited IP rights.",
-            "Fallback 2": "Work product is owned by the client with a right of first refusal.",
-            "Fallback 3": "Work product is owned by the vendor with limited client rights.",
-            "Red Line": "Work product is owned by the vendor with no client rights.",
-            "Deal Breaker": "Client has no rights to any work product."
+            "Topic": "Security Compliance Requirements",
+            "Preferred Position": "The vendor must comply with ISO 27001 and SOC 2 standards and provide annual audit reports.",
+            "Fallback 1": "The vendor must comply with SOC 2 standards and provide annual audit reports.",
+            "Fallback 2": "The vendor must comply with ISO 27001 standards and provide annual audit reports.",
+            "Fallback 3": "The vendor must provide annual audit reports.",
+            "Red Line": "The vendor must comply with ISO 27001 and SOC 2 standards without audit reports.",
+            "Deal Breaker": "No security compliance requirements are imposed."
           },
           {
-            "Topic": "Enterprise Software Security Compliance",
-            "Preferred Position": "Vendor complies with ISO 27001 and SOC 2 standards.",
-            "Fallback 1": "Vendor complies with SOC 2 standards.",
-            "Fallback 2": "Vendor complies with basic security best practices.",
-            "Fallback 3": "Vendor has no defined security compliance standards.",
-            "Red Line": "Vendor does not comply with any security standards.",
-            "Deal Breaker": "Vendor denies responsibility for security compliance."
+            "Topic": "IP Ownership in AI Development",
+            "Preferred Position": "All intellectual property developed during the project is owned by the client with full rights to commercialize.",
+            "Fallback 1": "All intellectual property developed during the project is owned by the client with limited rights to commercialize.",
+            "Fallback 2": "All intellectual property developed during the project is owned by the client with rights to use for internal purposes.",
+            "Fallback 3": "Intellectual property ownership is shared 50-50 between the client and vendor.",
+            "Red Line": "Intellectual property ownership is retained by the vendor with limited licensing rights.",
+            "Deal Breaker": "No intellectual property rights are transferred to the client."
           },
           {
-            "Topic": "Procurement Contract Term Limits",
-            "Preferred Position": "Contract term is limited to 3 years with automatic renewal option.",
-            "Fallback 1": "Contract term is limited to 3 years with no automatic renewal option.",
-            "Fallback 2": "Contract term is limited to 1 year with automatic renewal option.",
-            "Fallback 3": "Contract term is unlimited with no automatic renewal option.",
-            "Red Line": "Contract term is unlimited with no renewal option.",
-            "Deal Breaker": "Contract term is unlimited with no termination rights."
+            "Topic": "Procurement Contract Terms",
+            "Preferred Position": "The vendor agrees to deliver the goods or services within 30 days of contract execution with a 5% penalty for late delivery.",
+            "Fallback 1": "The vendor agrees to deliver the goods or services within 45 days of contract execution with a 5% penalty for late delivery.",
+            "Fallback 2": "The vendor agrees to deliver the goods or services within 60 days of contract execution with no penalty for late delivery.",
+            "Fallback 3": "The vendor agrees to deliver the goods or services within 90 days of contract execution with no penalty for late delivery.",
+            "Red Line": "The vendor agrees to deliver the goods or services within 120 days of contract execution with no penalty for late delivery.",
+            "Deal Breaker": "No delivery timelines or penalties are specified."
           },
           {
-            "Topic": "Data Breach Notification Requirements",
-            "Preferred Position": "Breach must be notified within 72 hours and reported to regulatory bodies.",
-            "Fallback 1": "Breach must be notified within 7 days and reported to regulatory bodies.",
-            "Fallback 2": "Breach must be notified within 7 days with no regulatory reporting.",
-            "Fallback 3": "Breach notification is not required.",
-            "Red Line": "Breach notification is required only for the vendor.",
-            "Deal Breaker": "Breach notification is not required for either party."
+            "Topic": "AI Vendor Terms for Model Access",
+            "Preferred Position": "The client is granted full access to the AI model for training and evaluation purposes with no restrictions.",
+            "Fallback 1": "The client is granted limited access to the AI model for training purposes only.",
+            "Fallback 2": "The client is granted access to the AI model for evaluation purposes only.",
+            "Fallback 3": "The client is granted access to the AI model with usage restrictions.",
+            "Red Line": "The client is granted access to the AI model with no usage restrictions.",
+            "Deal Breaker": "No access to the AI model is granted."
           },
           {
-            "Topic": "IP Assignment in Software Development",
-            "Preferred Position": "All IP is assigned to the client with no vendor rights.",
-            "Fallback 1": "All IP is assigned to the client with limited vendor rights.",
-            "Fallback 2": "All IP is assigned to the client with a right of first refusal.",
-            "Fallback 3": "IP is shared with vendor and client.",
-            "Red Line": "IP is owned by the vendor with no client rights.",
-            "Deal Breaker": "IP is not assigned to the client."
+            "Topic": "Professional Services Scope of Work",
+            "Preferred Position": "The vendor agrees to provide all services as defined in the detailed scope of work with no additional charges for scope changes.",
+            "Fallback 1": "The vendor agrees to provide all services as defined in the detailed scope of work with limited additional charges for scope changes.",
+            "Fallback 2": "The vendor agrees to provide all services as defined in the detailed scope of work with additional charges for scope changes.",
+            "Fallback 3": "The vendor agrees to provide all services as defined in the scope of work with no additional charges for minor scope changes.",
+            "Red Line": "The vendor agrees to provide all services as defined in the scope of work with no additional charges for any scope changes.",
+            "Deal Breaker": "No scope of work is defined and no additional charges are permitted."
           },
           {
-            "Topic": "Security Incident Response Plan",
-            "Preferred Position": "Vendor provides a detailed incident response plan with defined roles and timelines.",
-            "Fallback 1": "Vendor provides a detailed incident response plan with defined roles.",
-            "Fallback 2": "Vendor provides a basic incident response plan.",
-            "Fallback 3": "Vendor provides no incident response plan.",
-            "Red Line": "Vendor denies responsibility for incident response.",
-            "Deal Breaker": "Vendor refuses to provide any incident response plan."
+            "Topic": "Enterprise Software Licensing Model",
+            "Preferred Position": "The client is granted a perpetual license with no usage limits and annual maintenance fees at 15% of the initial license cost.",
+            "Fallback 1": "The client is granted a perpetual license with no usage limits and annual maintenance fees at 20% of the initial license cost.",
+            "Fallback 2": "The client is granted a perpetual license with usage limits and annual maintenance fees at 25% of the initial license cost.",
+            "Fallback 3": "The client is granted a perpetual license with annual maintenance fees at 30% of the initial license cost.",
+            "Red Line": "The client is granted a perpetual license with no maintenance fees.",
+            "Deal Breaker": "No perpetual license is granted and no maintenance fees are required."
           },
           {
-            "Topic": "Cloud Data Residency Compliance",
-            "Preferred Position": "Data is stored in EU data centers with compliance certifications.",
-            "Fallback 1": "Data is stored in EU data centers without compliance certifications.",
-            "Fallback 2": "Data is stored in data centers with no defined location.",
-            "Fallback 3": "Data is stored in data centers with no defined compliance requirements.",
-            "Red Line": "Data is stored in data centers outside EU with no compliance requirements.",
-            "Deal Breaker": "Data storage location is not defined."
+            "Topic": "Data Privacy and Consent Clause",
+            "Preferred Position": "The vendor must obtain explicit consent from all data subjects before processing their personal data.",
+            "Fallback 1": "The vendor must obtain implicit consent from all data subjects before processing their personal data.",
+            "Fallback 2": "The vendor must obtain consent from data subjects in certain cases.",
+            "Fallback 3": "The vendor must obtain consent from data subjects where required by law.",
+            "Red Line": "The vendor must obtain consent from data subjects in all cases.",
+            "Deal Breaker": "No consent is required from data subjects."
           }
         ]
       }
@@ -443,94 +443,94 @@
       "response": {
         "items": [
           {
-            "Topic": "NDA Mutual Non-Disclosure",
-            "Preferred Position": "Both parties agree to mutual non-disclosure of all confidential information exchanged during negotiations.",
-            "Fallback 1": "Confidentiality applies only to the disclosing party's information.",
-            "Fallback 2": "Non-disclosure is limited to information provided in written form.",
-            "Fallback 3": "Non-disclosure is limited to information exchanged during the term of the agreement.",
-            "Red Line": "Confidentiality does not apply to information shared by the other party.",
-            "Deal Breaker": "Disclosure of all information is permitted without restriction."
+            "Topic": "NDA Mutual Nondisclosure",
+            "Preferred Position": "Both parties agree to mutual nondisclosure with equal confidentiality obligations and defined disclosure periods.",
+            "Fallback 1": "One party agrees to nondisclosure while the other may disclose limited information under specific conditions.",
+            "Fallback 2": "One party agrees to nondisclosure with the other party having limited disclosure rights under agreed terms.",
+            "Fallback 3": "One party agrees to nondisclosure with no defined disclosure period or scope.",
+            "Red Line": "Confidentiality obligations are not reciprocal or include exceptions for public information.",
+            "Deal Breaker": "No confidentiality obligations are agreed upon by either party."
           },
           {
-            "Topic": "SaaS Data Processing",
-            "Preferred Position": "Data processing is governed by EU GDPR and other applicable data protection laws.",
-            "Fallback 1": "Data processing complies with the data controller's local laws.",
-            "Fallback 2": "Data processing is subject to the processor's local data laws.",
-            "Fallback 3": "Data processing is governed by the jurisdiction of the service provider.",
-            "Red Line": "Data processing is not subject to any data protection laws.",
-            "Deal Breaker": "Data processing is unrestricted and not subject to any legal compliance."
+            "Topic": "SaaS Service Level Agreement",
+            "Preferred Position": "Service level objectives are defined with clear performance metrics and escalation procedures.",
+            "Fallback 1": "Service level objectives are defined with less detailed performance metrics and limited escalation procedures.",
+            "Fallback 2": "Service level objectives are defined with general performance metrics and no defined escalation procedures.",
+            "Fallback 3": "Service level objectives are defined without specific metrics or escalation procedures.",
+            "Red Line": "No defined service level objectives or performance metrics are agreed upon.",
+            "Deal Breaker": "No service level agreement is agreed upon."
           },
           {
-            "Topic": "AI Vendor Terms Model Transparency",
-            "Preferred Position": "Vendor provides full transparency on AI model training data and algorithms.",
-            "Fallback 1": "Vendor provides limited transparency on AI model training data.",
-            "Fallback 2": "Vendor provides transparency on AI model training data upon request.",
-            "Fallback 3": "Vendor provides transparency on AI model training data in summary form.",
-            "Red Line": "Vendor does not provide any transparency on AI model training data.",
-            "Deal Breaker": "Vendor refuses to disclose any information about AI model training data."
+            "Topic": "Data Processing Agreement",
+            "Preferred Position": "Data processing is governed by strict compliance with applicable data protection laws and regular audits.",
+            "Fallback 1": "Data processing is governed by compliance with applicable data protection laws without regular audits.",
+            "Fallback 2": "Data processing is governed by compliance with applicable data protection laws with limited audit rights.",
+            "Fallback 3": "Data processing is governed by compliance with applicable data protection laws with no audit rights.",
+            "Red Line": "No compliance with data protection laws is required.",
+            "Deal Breaker": "No data protection requirements are agreed upon."
           },
           {
-            "Topic": "Professional Services Termination Notice",
-            "Preferred Position": "Termination notice period is 30 days with cause.",
-            "Fallback 1": "Termination notice period is 15 days with cause.",
-            "Fallback 2": "Termination notice period is 30 days without cause.",
-            "Fallback 3": "Termination notice period is 7 days with cause.",
-            "Red Line": "Termination notice period is zero days with cause.",
-            "Deal Breaker": "Termination is not subject to any notice period."
+            "Topic": "Security Compliance Requirements",
+            "Preferred Position": "All security requirements are defined with third-party audits and regular compliance checks.",
+            "Fallback 1": "All security requirements are defined with third-party audits but no regular compliance checks.",
+            "Fallback 2": "All security requirements are defined with limited audit rights and no regular compliance checks.",
+            "Fallback 3": "All security requirements are defined without third-party audits or compliance checks.",
+            "Red Line": "No defined security requirements or audit processes are agreed upon.",
+            "Deal Breaker": "No security compliance requirements are agreed upon."
           },
           {
-            "Topic": "Enterprise Software Data Residency",
-            "Preferred Position": "Data is stored and processed in the customer's country of residence.",
-            "Fallback 1": "Data is stored and processed in the vendor's country of residence.",
-            "Fallback 2": "Data is stored and processed in the country with the lowest regulatory burden.",
-            "Fallback 3": "Data is stored and processed in the country where the service is hosted.",
-            "Red Line": "Data is stored and processed in a third-party country without restriction.",
-            "Deal Breaker": "Data is stored and processed in a country with no data residency requirements."
+            "Topic": "IP Ownership and Licensing",
+            "Preferred Position": "All intellectual property is owned by the company with full licensing rights and no restrictions.",
+            "Fallback 1": "All intellectual property is owned by the company with limited licensing rights and restrictions.",
+            "Fallback 2": "All intellectual property is owned by the company with no defined licensing rights or restrictions.",
+            "Fallback 3": "All intellectual property is subject to third-party ownership with limited licensing rights.",
+            "Red Line": "No defined IP ownership or licensing rights are agreed upon.",
+            "Deal Breaker": "No IP ownership or licensing rights are agreed upon."
           },
           {
-            "Topic": "IP Assignment in Procurement Agreements",
-            "Preferred Position": "All IP developed during the procurement is assigned to the customer.",
-            "Fallback 1": "IP developed during the procurement is owned by the vendor with a non-exclusive license to the customer.",
-            "Fallback 2": "IP developed during the procurement is shared jointly with the customer.",
-            "Fallback 3": "IP developed during the procurement is owned by the vendor with a royalty-free license to the customer.",
-            "Red Line": "IP developed during the procurement is not assigned or licensed to the customer.",
-            "Deal Breaker": "IP developed during the procurement is exclusively owned by the vendor with no rights granted to the customer."
+            "Topic": "Procurement Contract Terms",
+            "Preferred Position": "Procurement terms include fixed pricing, defined deliverables, and clear performance metrics.",
+            "Fallback 1": "Procurement terms include fixed pricing with limited deliverables and performance metrics.",
+            "Fallback 2": "Procurement terms include fixed pricing with no defined deliverables or performance metrics.",
+            "Fallback 3": "Procurement terms include variable pricing with no defined deliverables or performance metrics.",
+            "Red Line": "No defined pricing, deliverables, or performance metrics are agreed upon.",
+            "Deal Breaker": "No procurement terms are agreed upon."
           },
           {
-            "Topic": "Security Incident Response Timeline",
-            "Preferred Position": "Vendor must notify customer of security incidents within 24 hours.",
-            "Fallback 1": "Vendor must notify customer of security incidents within 48 hours.",
-            "Fallback 2": "Vendor must notify customer of security incidents within 72 hours.",
-            "Fallback 3": "Vendor must notify customer of security incidents within 5 business days.",
-            "Red Line": "Vendor is not required to notify the customer of security incidents.",
-            "Deal Breaker": "Vendor is not required to notify the customer of any security incidents."
+            "Topic": "AI Vendor Terms and Usage",
+            "Preferred Position": "AI vendor terms include usage limits, data ownership, and strict compliance with ethical guidelines.",
+            "Fallback 1": "AI vendor terms include usage limits and data ownership with limited compliance with ethical guidelines.",
+            "Fallback 2": "AI vendor terms include usage limits with no defined data ownership or compliance with ethical guidelines.",
+            "Fallback 3": "AI vendor terms include no defined usage limits, data ownership, or ethical guidelines.",
+            "Red Line": "No defined AI vendor terms or ethical guidelines are agreed upon.",
+            "Deal Breaker": "No AI vendor terms are agreed upon."
           },
           {
-            "Topic": "Data Breach Notification Requirements",
-            "Preferred Position": "Vendor must notify customer of data breaches within 72 hours of discovery.",
-            "Fallback 1": "Vendor must notify customer of data breaches within 14 days of discovery.",
-            "Fallback 2": "Vendor must notify customer of data breaches within 30 days of discovery.",
-            "Fallback 3": "Vendor must notify customer of data breaches within 10 business days of discovery.",
-            "Red Line": "Vendor is not required to notify the customer of data breaches.",
-            "Deal Breaker": "Vendor is not required to notify the customer of any data breaches."
+            "Topic": "Professional Services Scope and Payment",
+            "Preferred Position": "Scope and payment terms are defined with clear deliverables, timelines, and payment milestones.",
+            "Fallback 1": "Scope and payment terms are defined with clear deliverables and timelines but no payment milestones.",
+            "Fallback 2": "Scope and payment terms are defined with limited deliverables and timelines but no payment milestones.",
+            "Fallback 3": "Scope and payment terms are defined with no deliverables, timelines, or payment milestones.",
+            "Red Line": "No defined scope, payment terms, or deliverables are agreed upon.",
+            "Deal Breaker": "No professional services agreement is agreed upon."
           },
           {
-            "Topic": "NDA Exclusions for Public Information",
-            "Preferred Position": "Exclusions apply only to information that is publicly available.",
-            "Fallback 1": "Exclusions apply to information that is not confidential.",
-            "Fallback 2": "Exclusions apply to information that is not sensitive.",
-            "Fallback 3": "Exclusions apply to information that is not protected by law.",
-            "Red Line": "Exclusions apply to all information regardless of confidentiality.",
-            "Deal Breaker": "Exclusions apply to all information and no information is protected."
+            "Topic": "Enterprise Software Licensing",
+            "Preferred Position": "Licensing terms include per-user pricing, usage limits, and regular audit rights.",
+            "Fallback 1": "Licensing terms include per-user pricing with limited usage limits and audit rights.",
+            "Fallback 2": "Licensing terms include per-user pricing with no defined usage limits or audit rights.",
+            "Fallback 3": "Licensing terms include no defined pricing, usage limits, or audit rights.",
+            "Red Line": "No defined licensing terms or audit rights are agreed upon.",
+            "Deal Breaker": "No licensing terms are agreed upon."
           },
           {
-            "Topic": "Vendor Audit Rights in SaaS Agreements",
-            "Preferred Position": "Vendor grants the customer the right to audit the service provider's data processing activities.",
-            "Fallback 1": "Vendor grants the customer the right to audit the service provider's data processing activities upon request.",
-            "Fallback 2": "Vendor grants the customer the right to audit the service provider's data processing activities annually.",
-            "Fallback 3": "Vendor grants the customer the right to audit the service provider's data processing activities semi-annually.",
-            "Red Line": "Vendor does not grant the customer the right to audit data processing activities.",
-            "Deal Breaker": "Vendor refuses to allow any audits of data processing activities."
+            "Topic": "Data Transfer and Storage Agreements",
+            "Preferred Position": "Data transfer and storage are governed by strict security standards and defined data residency requirements.",
+            "Fallback 1": "Data transfer and storage are governed by security standards with limited data residency requirements.",
+            "Fallback 2": "Data transfer and storage are governed by security standards with no defined data residency requirements.",
+            "Fallback 3": "Data transfer and storage are governed by no defined security standards or data residency requirements.",
+            "Red Line": "No defined security standards or data residency requirements are agreed upon.",
+            "Deal Breaker": "No data transfer or storage agreement is agreed upon."
           }
         ]
       }

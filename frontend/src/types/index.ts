@@ -151,12 +151,11 @@ export interface VoiceSessionResponse {
 
 export interface BrainNode {
   id: string;
+  name?: string;
   label: string;
   kind: string;
+  type?: "branch" | "leaf";
   metadata?: Record<string, unknown>;
-  pagerank?: number;
-  betweenness?: number;
-  community?: number;
   x?: number;
   y?: number;
   summary?: string;
@@ -174,15 +173,25 @@ export interface BrainEdge {
   strength?: number;
 }
 
+export interface MindMapNode {
+  id?: string;
+  name: string;
+  type: "branch" | "leaf";
+  kind?: string;
+  summary?: string;
+  metadata?: Record<string, unknown>;
+  children?: MindMapNode[];
+}
+
 export interface BrainGraph {
   nodes: BrainNode[];
   edges: BrainEdge[];
+  tree?: MindMapNode;
   metrics?: {
     node_count: number;
     edge_count: number;
-    communities: number;
-    modularity: number;
-    density: number;
+    branch_count: number;
+    relation_count: number;
   };
 }
 

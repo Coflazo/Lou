@@ -28,11 +28,7 @@ export function NodePopover({ node, onClose }: NodePopoverProps) {
               <X size={14} />
             </button>
           </header>
-          <div className="grid grid-cols-3 gap-2">
-            <Metric label="PageRank" value={node.pagerank} />
-            <Metric label="Between" value={node.betweenness} />
-            <Metric label="Comm" value={node.community} integer />
-          </div>
+          {node.summary && <p className="text-base text-[color:var(--color-ink-soft)]">{node.summary}</p>}
           {node.metadata && Object.keys(node.metadata).length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {Object.entries(node.metadata).map(([key, value]) => (
@@ -45,16 +41,5 @@ export function NodePopover({ node, onClose }: NodePopoverProps) {
         </motion.div>
       )}
     </AnimatePresence>
-  );
-}
-
-function Metric({ label, value, integer }: { label: string; value: number | undefined; integer?: boolean }) {
-  return (
-    <div className="flex flex-col">
-      <span className="eyebrow">{label}</span>
-      <span className="font-mono text-md text-ink">
-        {value == null ? "—" : integer ? value.toString() : value.toFixed(3)}
-      </span>
-    </div>
   );
 }

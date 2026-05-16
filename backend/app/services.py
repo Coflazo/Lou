@@ -18,7 +18,7 @@ from .ai import parse_command_with_openai
 from .algorithms import (
     BayesianRiskScorer,
     ClauseMatcher,
-    CompanyBrainGraph,
+    CompanyBrainMindMap,
     HMMSectionDetector,
     VoiceMatcher,
 )
@@ -68,16 +68,12 @@ class Store:
 
 
 class AlgorithmRegistry:
-    """Singleton holding per-playbook fitted matchers and the shared brain graph."""
+    """Singleton holding per-playbook fitted matchers and the shared brain map."""
 
     def __init__(self) -> None:
         self._lock = Lock()
         self._matchers: dict[str, ClauseMatcher] = {}
-        self._brain = CompanyBrainGraph(
-            pagerank_damping=settings.PAGERANK_DAMPING,
-            pagerank_tolerance=settings.PAGERANK_TOLERANCE,
-            pagerank_max_iterations=settings.PAGERANK_MAX_ITERATIONS,
-        )
+        self._brain = CompanyBrainMindMap()
         self._brain.cache_ttl_seconds = float(settings.BRAIN_CACHE_TTL_SECONDS)
 
     def get_matcher(self, playbook: Playbook) -> ClauseMatcher:
@@ -120,7 +116,7 @@ class AlgorithmRegistry:
             transition_begin_to_begin=settings.HMM_TRANSITION_BEGIN_TO_BEGIN,
         )
 
-    def brain(self) -> CompanyBrainGraph:
+    def brain(self) -> CompanyBrainMindMap:
         return self._brain
 
 
@@ -627,112 +623,11 @@ def reject_proposal(proposal_id: str, reason: str | None) -> Proposal:
 
 
 def graph_for_playbook(playbook: Playbook) -> dict[str, Any]:
-    """Render a hierarchical Playbook -> Topic -> P1/F1/R/X graph with proposal + commit overlays."""
-    nodes: list[dict[str, Any]] = []
-    edges: list[dict[str, Any]] = []
-    topic_ids: dict[str, str] = {}
-
-    nodes.append(
-        {
-            "id": playbook.id,
-            "label": playbook.name,
-            "kind": "playbook",
-            "summary": "Playbook",
-            "group": playbook.id,
-            "x": 360.0,
-            "y": 44.0,
-        }
-    )
-
-    topic_count = max(len(playbook.positions), 1)
-    columns = min(7, topic_count)
-    rows = (topic_count + columns - 1) // columns
-    x_gap = 600 / max(columns - 1, 1) if columns > 1 else 0
-    y_gap = 156 / max(rows - 1, 1) if rows > 1 else 0
-
-    for index, position in enumerate(playbook.positions, start=1):
-        topic_id = f"topic-{position.id}"
-        preferred_id = f"{position.id}-p1"
-        fallback_id = f"{position.id}-f1"
-        rationale_id = f"{position.id}-r"
-        exception_id = f"{position.id}-x"
-        topic_ids[position.topic.lower()] = topic_id
-
-        row = (index - 1) // columns
-        column = (index - 1) % columns
-        x = 60 + column * x_gap
-        y = 132 + row * y_gap
-        direction = 1 if row % 2 == 0 else -1
-
-        nodes.append(
-            {
-                "id": topic_id,
-                "label": position.topic,
-                "kind": "topic",
-                "summary": _short_summary(position.topic),
-                "group": topic_id,
-                "order": index,
-                "x": x,
-                "y": y,
-            }
-        )
-        nodes.append(
-            {
-                "id": preferred_id,
-                "label": "P1",
-                "kind": "preferred",
-                "summary": position.preferred_position,
-                "group": topic_id,
-                "order": index,
-                "x": x,
-                "y": y + direction * 28,
-            }
-        )
-        nodes.append(
-            {
-                "id": fallback_id,
-                "label": "F1",
-                "kind": "fallback",
-                "summary": position.fallback_position,
-                "group": topic_id,
-                "order": index,
-                "x": x,
-                "y": y + direction * 56,
-            }
-        )
-        nodes.append(
-            {
-                "id": rationale_id,
-                "label": "R",
-                "kind": "rationale",
-                "summary": f"Escalation level: {position.risk}",
-                "group": topic_id,
-                "order": index,
-                "x": x,
-                "y": y + direction * 84,
-                "risk": position.risk,
-            }
-        )
-        if position.keywords:
-            nodes.append(
-                {
-                    "id": exception_id,
-                    "label": "X",
-                    "kind": "exception",
-                    "summary": ", ".join(position.keywords[:3]),
-                    "group": topic_id,
-                    "order": index,
-                    "x": x,
-                    "y": y + direction * 112,
-                }
-            )
-
-        edges.append({"source": playbook.id, "target": topic_id, "kind": "hierarchy", "label": "topic"})
-        edges.append({"source": topic_id, "target": preferred_id, "kind": "hierarchy", "label": "preferred"})
-        edges.append({"source": preferred_id, "target": fallback_id, "kind": "hierarchy", "label": "fallback"})
-        edges.append({"source": fallback_id, "target": rationale_id, "kind": "hierarchy", "label": "rationale"})
-        if position.keywords:
-            edges.append({"source": rationale_id, "target": exception_id, "kind": "hierarchy", "label": "terms"})
+    """Render a single playbook as a .mm-style mini-brain tree."""
+    snapshot = registry.brain().from_playbook(playbook)
+    nodes = list(snapshot.nodes)
+    edges = [{**edge, "kind": "hierarchy"} for edge in snapshot.edges]
+    topic_ids = {position.topic.lower(): f"topic-{position.id}" for position in playbook.positions}
 
     for source, target, strength in _topic_relation_edges(playbook):
         edges.append(
@@ -749,18 +644,16 @@ def graph_for_playbook(playbook: Playbook) -> dict[str, Any]:
         if proposal.playbook_id != playbook.id:
             continue
         parent = topic_ids.get(proposal.topic.lower(), playbook.id)
-        parent_node = next((node for node in nodes if node["id"] == parent), None)
-        base_x = parent_node["x"] if parent_node else 360
-        base_y = parent_node["y"] if parent_node else 250
         nodes.append(
             {
                 "id": proposal.id,
+                "name": proposal.topic[:24],
                 "label": proposal.topic[:24],
                 "kind": "proposal",
+                "type": "leaf",
                 "summary": proposal.status.value,
-                "group": parent,
-                "x": min(680, base_x + 34),
-                "y": max(36, min(326, base_y + 34)),
+                "metadata": {"playbook_id": playbook.id, "proposal_id": proposal.id},
+                "depth": 3,
             }
         )
         edges.append({"source": parent, "target": proposal.id, "kind": "hierarchy", "label": "proposed"})
@@ -769,28 +662,42 @@ def graph_for_playbook(playbook: Playbook) -> dict[str, Any]:
         if commit.playbook_id != playbook.id:
             continue
         proposal = store.proposals.get(commit.proposal_id)
-        parent = topic_ids.get((proposal.topic if proposal else "").lower(), playbook.id)
-        parent_node = next((node for node in nodes if node["id"] == parent), None)
-        base_x = parent_node["x"] if parent_node else 360
-        base_y = parent_node["y"] if parent_node else 280
         nodes.append(
             {
                 "id": commit.id,
+                "name": "Published",
                 "label": "Published",
                 "kind": "commit",
+                "type": "leaf",
                 "summary": commit.message,
-                "group": parent,
-                "x": min(680, base_x + 60),
-                "y": max(36, min(326, base_y + 60)),
+                "metadata": {"playbook_id": playbook.id, "proposal_id": commit.proposal_id},
+                "depth": 4,
             }
         )
-        edges.append({"source": commit.proposal_id, "target": commit.id, "kind": "hierarchy", "label": "approved"})
+        edges.append(
+            {
+                "source": proposal.id if proposal else playbook.id,
+                "target": commit.id,
+                "kind": "hierarchy",
+                "label": "approved",
+            }
+        )
 
+    depth_counts: dict[int, int] = {}
     for node in nodes:
-        node["x"] = round(float(node["x"]), 2)
-        node["y"] = round(float(node["y"]), 2)
+        depth = int(node.get("depth", 0))
+        order = depth_counts.get(depth, 0)
+        depth_counts[depth] = order + 1
+        node.setdefault("x", round(80 + depth * 180, 2))
+        node.setdefault("y", round(44 + order * 36, 2))
 
-    return {"nodes": nodes, "edges": edges}
+    metrics = {
+        **snapshot.metrics,
+        "node_count": len(nodes),
+        "edge_count": len(edges),
+        "relation_count": sum(1 for edge in edges if edge.get("kind") == "topic_relation"),
+    }
+    return {"nodes": nodes, "edges": edges, "tree": snapshot.tree, "metrics": metrics}
 
 
 def _short_summary(topic: str) -> str:
@@ -822,12 +729,16 @@ def _topic_relation_edges(playbook: Playbook) -> list[tuple[PlaybookPosition, Pl
 
 
 def company_brain() -> dict[str, Any]:
-    entities = list(store.entities)
-    relations = list(store.relations)
-    if not entities:
-        return {"nodes": [], "edges": [], "metrics": {"node_count": 0, "edge_count": 0, "communities": 0, "modularity": 0.0, "density": 0.0}}
-    snapshot = registry.brain().compute(entities, relations)
-    return {"nodes": snapshot.nodes, "edges": snapshot.edges, "metrics": snapshot.metrics}
+    playbooks = list(store.playbooks.values())
+    if not playbooks:
+        return {
+            "nodes": [],
+            "edges": [],
+            "tree": {"id": "company-brain", "name": "Company Brain", "type": "branch", "children": []},
+            "metrics": {"node_count": 0, "edge_count": 0, "branch_count": 0, "relation_count": 0},
+        }
+    snapshot = registry.brain().from_playbooks(playbooks)
+    return {"nodes": snapshot.nodes, "edges": snapshot.edges, "tree": snapshot.tree, "metrics": snapshot.metrics}
 
 
 def export_json() -> StreamingResponse:

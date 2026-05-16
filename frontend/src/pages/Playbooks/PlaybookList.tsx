@@ -75,9 +75,6 @@ export function PlaybookListPage() {
                     <span className="font-display text-3xl">{playbook.position_count}</span>
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="font-mono text-xs uppercase tracking-wider text-[color:var(--color-warm-gray)]">
-                      v{playbook.version}
-                    </span>
                     <ArrowUpRight size={18} className="text-[color:var(--color-amber)]" weight="bold" />
                   </div>
                 </div>

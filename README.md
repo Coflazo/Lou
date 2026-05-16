@@ -25,12 +25,12 @@ The first version of this idea was only a proof of concept from an earlier event
 
 Use this path for a 2-minute judge demo:
 
-1. Log in as **Junior** and open the Siemens Mutual NDA playbook.
+1. Log in as **Junior** and open one of the generated legal playbooks.
 2. Upload or analyze a contract.
 3. Show mapped clauses, unmapped clauses, risk badges, and the Bayesian risk posterior.
 4. Open voice mode, paste or record a legal discussion, and generate proposed playbook updates.
 5. Switch to **Senior**, review a proposal, approve it, and show the commit.
-6. Switch to **Admin** and show Company Brain: clauses, policies, vendors, teams, and graph metrics.
+6. Switch to **Admin** and show Company Brain: playbooks as the top-level legal memory, with each playbook opening into its own mini-brain.
 
 ## Hackathon Partner Technologies
 
@@ -38,7 +38,7 @@ Lou uses hackathon partner technologies in the core product path:
 
 | Partner | How Lou Uses It |
 | --- | --- |
-| **Pioneer by Fastino** | Generated the 50-record Siemens Mutual NDA playbook dataset. Each record includes one preferred position, three fallbacks, one red line, and one deal breaker. The generated records are checked into `demo-data/lou-pioneer-playbook-datasets-50.jsonl` and converted into the runtime JSONL seed files. |
+| **Pioneer by Fastino** | Generated the 50-record legal playbook dataset. Each record includes one preferred position, three fallbacks, one red line, and one deal breaker. Lou materializes those rows into 9 runtime playbooks across NDA, DPA/privacy, SaaS, AI vendor, security, IP licensing, procurement, services, and software. |
 | **SLNG** | Powers the intended live voice path for STT/TTS. When `LOU_SLNG_API_KEY` is not set, Lou still runs in transcript fallback mode so judges can test the workflow without external credentials. |
 | **OpenAI** | Optional command parsing and dense semantic search fusion. Lou falls back to deterministic local behavior when `LOU_OPENAI_API_KEY` is absent. |
 
@@ -84,7 +84,7 @@ Lou uses local, inspectable algorithms so the demo is not just a wrapper around 
 | `section_detector.py` | HMM Viterbi decoding in log-space to segment legal text into sections. |
 | `voice_matching.py` | Jaro-Winkler, edit distance, and TF-IDF matching to connect transcripts to playbook topics. |
 | `semantic_search.py` | BM25 plus optional OpenAI embeddings, fused with reciprocal rank fusion. |
-| `company_brain.py` | PageRank, betweenness centrality, and Louvain communities for the legal knowledge graph. |
+| `company_brain.py` | Recursive `.mm`-style mind-map JSON for a readable Company Brain view. |
 
 ### Frontend
 
@@ -102,7 +102,7 @@ The UI has a custom design system in `frontend/src/design-system/`: OKLCH color 
 
 ## Run Locally
 
-### One-Terminal Launch
+### Terminal Launch
 
 ```bash
 ./scripts/launch_lou.sh
@@ -165,7 +165,6 @@ All tunable constants live in `backend/app/config.py` as a `pydantic-settings` m
 | `LOU_CLAUSE_MATCH_MIN_SCORE` | `0.22` | TF-IDF cosine threshold for mapped findings. |
 | `LOU_VOICE_MATCH_THRESHOLD` | `0.55` | Voice-to-playbook matching threshold. |
 | `LOU_RISK_PRIOR_ALPHA` | `2.0,2.0,2.0` | Dirichlet prior for Low, Medium, High risk. |
-| `LOU_PAGERANK_DAMPING` | `0.85` | PageRank damping for Company Brain. |
 | `LOU_OPENAI_API_KEY` | unset | Enables OpenAI command parsing and dense semantic search. |
 | `LOU_SLNG_API_KEY` | unset | Enables live SLNG voice integrations. |
 
@@ -195,7 +194,35 @@ All runtime seed data lives in `demo-data/*.jsonl`, one JSON object per line:
 - `entities.jsonl`
 - `relations.jsonl`
 
-`demo-data/siemens-mutual-nda-playbook.xlsx` is kept as the original workbook source. It is not required at runtime.
+`demo-data/lou-pioneer-playbook-datasets-50.jsonl` is the Pioneer source dataset. `scripts/materialize_runtime_playbooks.py` converts it into the runtime `playbooks.jsonl` and `playbook_positions.jsonl` files used by the app. The workbook files are kept as review artifacts and are not required at runtime.
+
+### Generate 50 Pioneer Playbooks
+
+To generate a larger Pioneer matrix with 50 distinct playbooks and 50 rows per playbook, add your Pioneer key to `api-keys.txt`:
+
+```bash
+PIONEER_API_KEY=your_key_here
+```
+
+Then run:
+
+```bash
+python3 scripts/generate_lou_playbook_matrix.py --playbooks 50 --rows-per-playbook 50 --batch-size 5
+```
+
+This makes 2,500 total playbook rows and writes:
+
+- `demo-data/lou-pioneer-playbook-matrix-50x50.jsonl`
+- `demo-data/lou-pioneer-playbook-matrix-50x50.xlsx`
+- `demo-data/pioneer-playbook-matrix-request.json`
+- `demo-data/pioneer-playbook-matrix-response.json`
+- `demo-data/siemens-mutual-nda-playbook.xlsx`
+
+For a faster validation run, keep 50 playbooks but lower the row count:
+
+```bash
+python3 scripts/generate_lou_playbook_matrix.py --playbooks 50 --rows-per-playbook 10 --batch-size 5
+```
 
 ## Tests
 

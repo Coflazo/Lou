@@ -40,17 +40,14 @@ export function Sidebar() {
   return (
     <aside className="row-span-2 col-start-1 col-end-2 border-r border-[color:var(--border-soft)] bg-surface-raised flex flex-col">
       <div className="px-5 pt-6 pb-4 flex items-center gap-3">
-        <motion.span
-          initial={{ rotate: -8, opacity: 0 }}
-          animate={{ rotate: 0, opacity: 1 }}
+        <motion.img
+          src="/lou-wordmark-on-light.png"
+          alt="Lou"
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="font-display text-3xl text-ink"
-        >
-          Lou
-        </motion.span>
-        <span className="font-mono text-xs uppercase tracking-[0.2em] text-[color:var(--color-warm-gray)]">
-          legal · v1.0
-        </span>
+          className="h-8 w-auto"
+        />
       </div>
 
       <nav className="flex-1 px-3 py-2 flex flex-col gap-0.5" aria-label="Primary navigation">
@@ -78,7 +75,7 @@ export function Sidebar() {
                     {isActive && (
                       <motion.span
                         layoutId="sidebar-marker"
-                        className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-[color:var(--color-amber)]"
+                        className="absolute left-1 top-2 bottom-2 w-[3px] rounded-full bg-[color:var(--color-amber)]"
                         initial={{ scaleY: 0 }}
                         animate={{ scaleY: 1 }}
                         exit={{ scaleY: 0 }}

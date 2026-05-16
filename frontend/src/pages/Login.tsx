@@ -36,7 +36,7 @@ export function LoginPage() {
           transition={{ duration: 0.6 }}
           className="font-mono text-xs uppercase tracking-[0.3em] text-[color:var(--color-amber)]"
         >
-          Legal workspace · v1.0
+          Legal workspace
         </motion.span>
 
         <div className="flex flex-col gap-6 max-w-lg">
@@ -44,9 +44,9 @@ export function LoginPage() {
             initial={{ clipPath: "inset(0 100% 0 0)", opacity: 0 }}
             animate={{ clipPath: "inset(0 0% 0 0)", opacity: 1 }}
             transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display text-7xl"
+            className="w-fit"
           >
-            Lou
+            <img src="/lou-wordmark-on-dark.png" alt="Lou" className="h-20 w-auto" />
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 12 }}

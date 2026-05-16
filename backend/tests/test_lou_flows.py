@@ -59,14 +59,20 @@ def make_docx_bytes(text: str) -> bytes:
     return output.getvalue()
 
 
-def test_imports_all_demo_nda_rows():
+def test_imports_all_demo_playbooks_and_positions():
     login("ADMIN")
     response = client.get("/api/playbooks")
     assert response.status_code == 200
     playbooks = response.json()
+    assert len(playbooks) >= 5
     nda = next(item for item in playbooks if item["slug"] == "mutual-nda")
     detail = client.get(f"/api/playbooks/{nda['id']}").json()
-    assert len(detail["positions"]) == 50
+    total_positions = sum(
+        len(client.get(f"/api/playbooks/{playbook['id']}").json()["positions"])
+        for playbook in playbooks
+    )
+    assert total_positions == 50
+    assert len(detail["positions"]) >= 1
     assert detail["columns"] == ["Topic", "Preferred Position", "Fallback 1", "Fallback 2", "Fallback 3", "Red Line", "Deal Breaker"]
     assert detail["positions"][0]["columns"]["Preferred Position"]
 

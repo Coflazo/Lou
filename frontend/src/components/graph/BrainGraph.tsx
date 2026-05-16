@@ -1,20 +1,35 @@
 import { motion } from "framer-motion";
-import { scaleLinear, scaleOrdinal, scaleSqrt } from "d3-scale";
 import { useMemo, useState } from "react";
-import { useGraphSimulation } from "@/hooks/useGraph";
 import { cn } from "@/lib/utils";
-import type { BrainEdge, BrainNode } from "@/types";
+import type { BrainNode, MindMapNode } from "@/types";
 
 interface BrainGraphProps {
-  nodes: BrainNode[];
-  edges: BrainEdge[];
+  tree: MindMapNode | null | undefined;
   width?: number;
   height?: number;
   className?: string;
   onSelect?: (node: BrainNode | null) => void;
 }
 
-const COMMUNITY_COLORS = [
+interface LayoutNode {
+  id: string;
+  name: string;
+  type: "branch" | "leaf";
+  kind?: string;
+  summary?: string;
+  metadata?: Record<string, unknown>;
+  x: number;
+  y: number;
+  depth: number;
+  branchIndex: number;
+}
+
+interface LayoutEdge {
+  source: LayoutNode;
+  target: LayoutNode;
+}
+
+const BRANCH_COLORS = [
   "var(--color-amber)",
   "var(--color-green)",
   "var(--color-red)",
@@ -22,94 +37,166 @@ const COMMUNITY_COLORS = [
   "var(--color-warm-gray)",
 ];
 
-export function BrainGraph({ nodes, edges, width = 720, height = 480, className, onSelect }: BrainGraphProps) {
+export function BrainGraph({ tree, width = 760, height = 520, className, onSelect }: BrainGraphProps) {
   const [hovered, setHovered] = useState<string | null>(null);
-  const sim = useGraphSimulation(nodes, edges, width, height);
-
-  const radius = useMemo(() => {
-    const values = nodes.map((node) => node.pagerank ?? 0);
-    return scaleSqrt<number>().domain([Math.min(...values, 0), Math.max(...values, 0.01)]).range([8, 26]);
-  }, [nodes]);
-
-  const stroke = useMemo(() => {
-    const values = nodes.map((node) => node.betweenness ?? 0);
-    return scaleLinear<number>().domain([Math.min(...values, 0), Math.max(...values, 0.01)]).range([0.5, 3.5]);
-  }, [nodes]);
-
-  const color = useMemo(() => {
-    return scaleOrdinal<number, string>()
-      .domain(Array.from(new Set(nodes.map((node) => node.community ?? 0))))
-      .range(COMMUNITY_COLORS);
-  }, [nodes]);
+  const layout = useMemo(() => layoutMindMap(tree, width, height), [tree, width, height]);
 
   return (
-    <div className={cn("relative w-full overflow-hidden rounded-[20px] bg-surface-raised border border-[color:var(--border-soft)]", className)}>
+    <div
+      className={cn("relative w-full overflow-hidden rounded-[20px] bg-surface-raised border border-[color:var(--border-soft)]", className)}
+      style={{ height }}
+    >
       <svg
         viewBox={`0 0 ${width} ${height}`}
         className="w-full h-full"
         role="img"
-        aria-label="Company brain knowledge graph"
+        aria-label="Company brain mind map"
       >
         <g>
-          {sim.links.map((link, index) => {
-            const source = link.source as { id?: string; x?: number; y?: number };
-            const target = link.target as { id?: string; x?: number; y?: number };
-            if (!source.x || !target.x) return null;
+          {layout.edges.map((edge, index) => {
+            const active = hovered === edge.source.id || hovered === edge.target.id;
             return (
-              <motion.line
-                key={`${source.id}-${target.id}-${index}`}
-                x1={source.x}
-                y1={source.y}
-                x2={target.x}
-                y2={target.y}
-                stroke="var(--border-soft)"
-                strokeOpacity={hovered ? (hovered === source.id || hovered === target.id ? 0.9 : 0.18) : 0.5}
-                strokeWidth={1}
+              <motion.path
+                key={`${edge.source.id}-${edge.target.id}`}
+                d={branchPath(edge.source, edge.target)}
+                fill="none"
+                stroke={BRANCH_COLORS[edge.target.branchIndex % BRANCH_COLORS.length]}
+                strokeOpacity={hovered ? (active ? 0.85 : 0.14) : 0.34}
+                strokeWidth={edge.target.depth === 1 ? 2 : 1.4}
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
-                transition={{ delay: Math.min(index, 80) * 0.005, duration: 0.6 }}
+                transition={{ delay: index * 0.02, duration: 0.45 }}
               />
             );
           })}
         </g>
+
         <g>
-          {sim.nodes.map((node, index) => {
-            const r = Math.max(10, radius(node.pagerank ?? 0));
-            const isHovered = hovered === node.id;
+          {layout.nodes.map((node) => {
+            const isRoot = node.depth === 0;
+            const isBranch = node.type === "branch";
+            const nodeWidth = isRoot ? 132 : isBranch ? 138 : 166;
+            const nodeHeight = isRoot ? 44 : isBranch ? 34 : 30;
+            const color = BRANCH_COLORS[node.branchIndex % BRANCH_COLORS.length];
             return (
-              <motion.g
+              <g
                 key={node.id}
-                transform={`translate(${node.x ?? 0}, ${node.y ?? 0})`}
+                transform={`translate(${node.x}, ${node.y})`}
                 onMouseEnter={() => setHovered(node.id)}
                 onMouseLeave={() => setHovered(null)}
-                onClick={() => onSelect?.(nodes.find((item) => item.id === node.id) ?? null)}
-                initial={{ scale: 0.4, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: Math.min(index, 60) * 0.015, type: "spring", stiffness: 220, damping: 18 }}
+                onClick={() =>
+                  onSelect?.({
+                    id: node.id,
+                    name: node.name,
+                    label: node.name,
+                    kind: node.kind ?? node.type,
+                    type: node.type,
+                    summary: node.summary,
+                    metadata: node.metadata,
+                  })
+                }
                 className="cursor-pointer"
               >
-                <motion.circle
-                  r={r}
-                  fill={color(node.community ?? 0)}
-                  stroke="var(--color-ink)"
-                  strokeWidth={stroke(node.betweenness ?? 0)}
-                  animate={{ r: isHovered ? r * 1.18 : r }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                <motion.rect
+                  x={-nodeWidth / 2}
+                  y={-nodeHeight / 2}
+                  width={nodeWidth}
+                  height={nodeHeight}
+                  rx={isRoot ? 18 : 10}
+                  fill={isRoot ? "var(--color-ink)" : isBranch ? "var(--surface-sunken)" : "var(--surface-raised)"}
+                  stroke={isRoot ? "var(--color-ink)" : color}
+                  strokeWidth={isRoot ? 0 : isBranch ? 1.6 : 1}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
                 />
+                {!isRoot && (
+                  <circle
+                    cx={-nodeWidth / 2 + 12}
+                    cy={0}
+                    r={3.5}
+                    fill={color}
+                  />
+                )}
                 <text
-                  y={r + 12}
-                  textAnchor="middle"
-                  className="font-mono"
-                  fontSize="10"
-                  fill="var(--color-ink-soft)"
+                  x={isRoot ? 0 : -nodeWidth / 2 + 22}
+                  y={4}
+                  textAnchor={isRoot ? "middle" : "start"}
+                  className={isRoot ? "font-display" : "font-mono"}
+                  fontSize={isRoot ? 17 : isBranch ? 11 : 10}
+                  fill={isRoot ? "var(--color-paper)" : "var(--color-ink)"}
                 >
-                  {node.label}
+                  {trimLabel(node.name, isRoot ? 16 : isBranch ? 18 : 24)}
                 </text>
-              </motion.g>
+              </g>
             );
           })}
         </g>
       </svg>
     </div>
   );
+}
+
+function layoutMindMap(tree: MindMapNode | null | undefined, width: number, height: number) {
+  if (!tree) return { nodes: [], edges: [] };
+
+  const nodes: LayoutNode[] = [];
+  const edges: LayoutEdge[] = [];
+  const root = makeNode(tree, width * 0.22, height / 2, 0, 0);
+  nodes.push(root);
+
+  const branches = tree.children ?? [];
+  const branchGap = height / Math.max(branches.length + 1, 2);
+
+  branches.forEach((branch, branchIndex) => {
+    const branchNode = makeNode(branch, width * 0.48, branchGap * (branchIndex + 1), 1, branchIndex);
+    nodes.push(branchNode);
+    edges.push({ source: root, target: branchNode });
+
+    const leaves = branch.children ?? [];
+    const leafGap = Math.min(38, Math.max(14, (branchGap * 0.76) / Math.max(leaves.length - 1, 1)));
+    const startY = branchNode.y - (leafGap * (leaves.length - 1)) / 2;
+
+    leaves.forEach((leaf, leafIndex) => {
+      const leafNode = makeNode(
+        leaf,
+        width * 0.78,
+        clamp(startY + leafIndex * leafGap, 32, height - 32),
+        2,
+        branchIndex,
+      );
+      nodes.push(leafNode);
+      edges.push({ source: branchNode, target: leafNode });
+    });
+  });
+
+  return { nodes, edges };
+}
+
+function makeNode(node: MindMapNode, x: number, y: number, depth: number, branchIndex: number): LayoutNode {
+  return {
+    id: node.id ?? `${depth}-${branchIndex}-${node.name}`,
+    name: node.name,
+    type: node.type,
+    kind: node.kind,
+    summary: node.summary,
+    metadata: node.metadata,
+    x,
+    y,
+    depth,
+    branchIndex,
+  };
+}
+
+function branchPath(source: LayoutNode, target: LayoutNode): string {
+  const mid = source.x + (target.x - source.x) * 0.55;
+  return `M ${source.x} ${source.y} C ${mid} ${source.y}, ${mid} ${target.y}, ${target.x} ${target.y}`;
+}
+
+function trimLabel(value: string, max: number): string {
+  return value.length > max ? `${value.slice(0, max - 1)}…` : value;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
 }

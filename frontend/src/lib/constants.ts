@@ -80,11 +80,11 @@ export const COPY = {
   },
   BRAIN: {
     TITLE: "Company brain",
-    SUBTITLE: "Entities, policies, and clauses across the legal organisation.",
-    SEARCH_PLACEHOLDER: "Search the graph",
-    LEGEND_PAGERANK: "Node size: PageRank",
-    LEGEND_COMMUNITY: "Hue: community",
-    LEGEND_BETWEENNESS: "Border: betweenness",
+    SUBTITLE: "A simple mind map of legal teams, policies, vendors, and clauses.",
+    SEARCH_PLACEHOLDER: "Search the mind map",
+    LEGEND_ROOT: "Root: company legal memory",
+    LEGEND_BRANCH: "Branches: entity groups",
+    LEGEND_LEAF: "Leaves: teams, policies, vendors, and clauses",
   },
   EXPORT: {
     TITLE: "Exports",

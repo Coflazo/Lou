@@ -5,6 +5,7 @@ import type {
   Commit,
   Contract,
   ContractListItem,
+  MindMapNode,
   Playbook,
   PlaybookPosition,
   PlaybookSummary,
@@ -57,8 +58,8 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify({ columns }),
     }),
-  playbookBrain: (id: string) => request<BrainGraph>(`/api/playbooks/${id}/brain`),
-  companyBrain: () => request<BrainGraph>("/api/company-brain"),
+  playbookBrain: (id: string) => request<BrainGraph>(`/api/playbooks/${id}/brain`).then(normalizeBrainGraph),
+  companyBrain: () => request<BrainGraph>("/api/company-brain").then(normalizeBrainGraph),
   listContracts: () => request<ContractListItem[]>("/api/contracts"),
   getContract: (id: string) => request<Contract>(`/api/contracts/${id}`),
   analyzeContract: (payload: { playbook_id: string; name: string; text: string }) =>
@@ -98,5 +99,73 @@ export const api = {
   command: (payload: { command: string; playbook_id?: string | null }) =>
     request<CommandResponse>("/api/lou-command", { method: "POST", body: JSON.stringify(payload) }),
 };
+
+function normalizeBrainGraph(graph: BrainGraph): BrainGraph {
+  if (graph.tree) return graph;
+  const nodes = graph.nodes ?? [];
+  const edges = graph.edges ?? [];
+  return {
+    ...graph,
+    nodes,
+    edges,
+    tree: buildMindMapFromNodes(nodes),
+    metrics: {
+      node_count: nodes.length,
+      edge_count: edges.length,
+      branch_count: new Set(nodes.map((node) => node.kind)).size,
+      relation_count: edges.length,
+      ...graph.metrics,
+    },
+  };
+}
+
+function buildMindMapFromNodes(nodes: BrainGraph["nodes"]): MindMapNode {
+  const grouped = new Map<string, MindMapNode[]>();
+  for (const node of nodes) {
+    if (node.kind === "root" || node.kind === "group") continue;
+    const kind = node.kind || "entity";
+    const bucket = grouped.get(kind) ?? [];
+    bucket.push({
+      id: node.id,
+      name: node.label || node.name || node.id,
+      type: "leaf",
+      kind,
+      summary: node.summary,
+      metadata: node.metadata,
+    });
+    grouped.set(kind, bucket);
+  }
+
+  return {
+    id: "company-brain",
+    name: "Company Brain",
+    type: "branch",
+    kind: "root",
+    summary: "Legal knowledge map",
+    children: Array.from(grouped.entries())
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([kind, children]) => ({
+        id: `group-${kind}`,
+        name: humanGroupName(kind),
+        type: "branch",
+        kind: "group",
+        summary: `${children.length} item${children.length === 1 ? "" : "s"}`,
+        children: children.sort((left, right) => left.name.localeCompare(right.name)),
+      })),
+  };
+}
+
+function humanGroupName(kind: string): string {
+  const label = kind
+    .replace(/[-_]/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => `${word[0]?.toUpperCase() ?? ""}${word.slice(1)}`)
+    .join(" ");
+  if (!label) return "Entities";
+  if (label.endsWith("y")) return `${label.slice(0, -1)}ies`;
+  if (label.endsWith("s")) return label;
+  return `${label}s`;
+}
 
 export { API_BASE, ApiError };

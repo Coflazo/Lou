@@ -61,7 +61,13 @@ def main() -> None:
     playbook_id = playbooks[0]["id"]
 
     status, playbook = request("GET", f"/api/playbooks/{playbook_id}")
-    assert_true(status == 200 and len(playbook["positions"]) == 50, "playbook detail did not expose 50 positions")
+    assert_true(status == 200 and len(playbook["positions"]) >= 1, "playbook detail did not expose positions")
+    total_positions = len(playbook["positions"])
+    for listed_playbook in playbooks[1:]:
+        status, listed_detail = request("GET", f"/api/playbooks/{listed_playbook['id']}")
+        assert_true(status == 200, f"playbook detail failed for {listed_playbook['id']}")
+        total_positions += len(listed_detail["positions"])
+    assert_true(total_positions >= 50, f"runtime playbooks exposed only {total_positions} total positions")
     known_text = playbook["positions"][0]["preferred_position"]
 
     status, company_brain = request("GET", "/api/company-brain")

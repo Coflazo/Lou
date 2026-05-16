@@ -43,7 +43,6 @@ export function PlaybookDetailPage() {
         subtitle={COPY.PLAYBOOKS.DETAIL_SUBTITLE}
         actions={
           <div className="flex items-center gap-2">
-            <Badge tone="neutral">v{playbook.version}</Badge>
             <Badge tone="accent">{playbook.positions.length} positions</Badge>
           </div>
         }
