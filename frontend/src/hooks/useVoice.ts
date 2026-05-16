@@ -6,6 +6,7 @@ interface VoiceRecorder {
   state: VoiceState;
   amplitude: number;
   error: string | null;
+  blob: Blob | null;
   blobUrl: string | null;
   start: () => Promise<void>;
   stop: () => void;
@@ -16,6 +17,7 @@ export function useVoiceRecorder(): VoiceRecorder {
   const [state, setState] = useState<VoiceState>("idle");
   const [amplitude, setAmplitude] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [blob, setBlob] = useState<Blob | null>(null);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
 
   const streamRef = useRef<MediaStream | null>(null);
@@ -42,6 +44,7 @@ export function useVoiceRecorder(): VoiceRecorder {
   const start = useCallback(async () => {
     if (state === "listening") return;
     setError(null);
+    setBlob(null);
     setBlobUrl(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -68,15 +71,19 @@ export function useVoiceRecorder(): VoiceRecorder {
       };
       tick();
 
-      const recorder = new MediaRecorder(stream);
+      const options = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? { mimeType: "audio/webm;codecs=opus" }
+        : undefined;
+      const recorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = recorder;
       chunksRef.current = [];
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) chunksRef.current.push(event.data);
       };
       recorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        setBlobUrl(URL.createObjectURL(blob));
+        const recording = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        setBlob(recording);
+        setBlobUrl(URL.createObjectURL(recording));
         setState("stopped");
       };
       recorder.start();
@@ -98,9 +105,10 @@ export function useVoiceRecorder(): VoiceRecorder {
     cleanup();
     setState("idle");
     setAmplitude(0);
+    setBlob(null);
     setBlobUrl(null);
     setError(null);
   }, [cleanup]);
 
-  return { state, amplitude, error, blobUrl, start, stop, reset };
+  return { state, amplitude, error, blob, blobUrl, start, stop, reset };
 }

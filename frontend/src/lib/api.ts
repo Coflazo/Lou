@@ -83,6 +83,13 @@ export const api = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+  voiceAudioTranscript: ({ playbook_id, language, file }: { playbook_id: string; language?: string; file: Blob }) => {
+    const form = new FormData();
+    form.append("playbook_id", playbook_id);
+    form.append("language", language ?? "en");
+    form.append("file", file, "lou-recording.webm");
+    return request<VoiceTranscriptResponse>("/api/voice/transcribe-audio", { method: "POST", body: form });
+  },
   listReview: () => request<Proposal[]>("/api/review"),
   approveProposal: (proposalId: string, editedText?: string | null) =>
     request<{ proposal: Proposal; commit: Commit }>(`/api/review/${proposalId}/approve`, {

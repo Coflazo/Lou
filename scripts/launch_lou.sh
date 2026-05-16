@@ -47,6 +47,9 @@ load_keys() {
       [[ -z "${key// }" ]] && continue
       [[ "$key" == \#* ]] && continue
       export "$key=$value"
+      if [[ "$key" != LOU_* ]]; then
+        export "LOU_${key}=$value"
+      fi
     done < "$ROOT_DIR/api-keys.txt"
   fi
 }

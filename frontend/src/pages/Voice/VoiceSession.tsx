@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Microphone, Stop } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/layout";
 import { Button, Select, Textarea } from "@/components/primitives";
 import { VoiceOrb, WaveformViz, TranscriptRoll, type TranscriptSegment } from "@/components/voice";
 import { ProposalCard } from "@/components/data";
-import { usePlaybooks, useVoiceTranscript } from "@/hooks/useApi";
+import { usePlaybooks, useVoiceAudioTranscript, useVoiceTranscript } from "@/hooks/useApi";
 import { useVoiceRecorder } from "@/hooks/useVoice";
 import { COPY } from "@/lib/constants";
 import type { Proposal } from "@/types";
@@ -20,7 +20,9 @@ const LANGS = [
 export function VoiceSessionPage() {
   const playbooks = usePlaybooks();
   const transcribe = useVoiceTranscript();
+  const transcribeAudio = useVoiceAudioTranscript();
   const recorder = useVoiceRecorder();
+  const lastTranscribedBlob = useRef<Blob | null>(null);
   const [playbookId, setPlaybookId] = useState<string>("");
   const [language, setLanguage] = useState<string>("en");
   const [transcript, setTranscript] = useState<string>(
@@ -45,6 +47,25 @@ export function VoiceSessionPage() {
       { id: `seg-${Date.now()}`, text: transcript, speaker: "You", ts: new Date().toLocaleTimeString() },
     ]);
   }
+
+  useEffect(() => {
+    if (!playbookId || !recorder.blob || recorder.blob === lastTranscribedBlob.current) return;
+    lastTranscribedBlob.current = recorder.blob;
+    transcribeAudio
+      .mutateAsync({ playbook_id: playbookId, language, file: recorder.blob })
+      .then((response) => {
+        const spokenText = response.transcript?.trim();
+        if (spokenText) {
+          setTranscript(spokenText);
+          setSegments((current) => [
+            ...current,
+            { id: `seg-${Date.now()}`, text: spokenText, speaker: "You", ts: new Date().toLocaleTimeString() },
+          ]);
+        }
+        setProposals(response.proposed_updates);
+      })
+      .catch(() => undefined);
+  }, [language, playbookId, recorder.blob, transcribeAudio]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -72,6 +93,11 @@ export function VoiceSessionPage() {
 
           <div className="flex flex-col gap-3">
             {recorder.error && <p className="text-sm text-[color:var(--color-red)]">{recorder.error}</p>}
+            {transcribeAudio.error && (
+              <p className="text-sm text-[color:var(--color-red)]">
+                {transcribeAudio.error instanceof Error ? transcribeAudio.error.message : "SLNG transcription failed."}
+              </p>
+            )}
             <div className="flex items-center justify-center gap-3">
               {!orbActive ? (
                 <Button size="lg" iconLeft={<Microphone size={16} weight="fill" />} onClick={recorder.start}>
@@ -86,6 +112,9 @@ export function VoiceSessionPage() {
                 <audio controls src={recorder.blobUrl} className="rounded-[8px]" />
               )}
             </div>
+            {transcribeAudio.isPending && (
+              <p className="text-center text-sm text-[color:var(--color-amber)]">Transcribing with SLNG...</p>
+            )}
           </div>
         </div>
 
@@ -108,7 +137,7 @@ export function VoiceSessionPage() {
             onChange={(event) => setTranscript(event.target.value)}
             rows={8}
           />
-          <Button onClick={submit} loading={transcribe.isPending}>
+          <Button onClick={submit} loading={transcribe.isPending || transcribeAudio.isPending}>
             Create proposals
           </Button>
         </div>

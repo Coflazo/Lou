@@ -140,6 +140,14 @@ export function useVoiceTranscript() {
   });
 }
 
+export function useVoiceAudioTranscript() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: api.voiceAudioTranscript,
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.review }),
+  });
+}
+
 export function useCommand() {
   return useMutation({ mutationFn: api.command });
 }

@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from threading import Lock
 from typing import Any
 
+import httpx
 from docx import Document
 from fastapi.responses import StreamingResponse
 from openpyxl import Workbook
@@ -44,6 +45,8 @@ SLNG_STT_MODEL = "slng/deepgram/nova:3-multi"
 SLNG_TTS_MODEL = "slng/rime/arcana:3-en"
 SLNG_STT_PATH = f"/v1/bridges/unmute/stt/{SLNG_STT_MODEL}"
 SLNG_TTS_PATH = f"/v1/bridges/unmute/tts/{SLNG_TTS_MODEL}"
+SLNG_STT_HTTP_URL = f"https://api.slng.ai{SLNG_STT_PATH}"
+SLNG_TTS_HTTP_URL = f"https://api.slng.ai{SLNG_TTS_PATH}"
 
 
 @dataclass
@@ -512,7 +515,7 @@ def voice_session(playbook_id: str | None, language: str = "en") -> dict[str, An
         "supported_languages": sorted(set(settings.VOICE_LANGUAGES)),
         "stt": {
             "model": SLNG_STT_MODEL,
-            "http_url": f"https://api.slng.ai{SLNG_STT_PATH}",
+            "http_url": SLNG_STT_HTTP_URL,
             "websocket_url": f"wss://api.slng.ai{SLNG_STT_PATH}",
             "request": {
                 "language": selected_language,
@@ -524,7 +527,7 @@ def voice_session(playbook_id: str | None, language: str = "en") -> dict[str, An
         },
         "tts": {
             "model": SLNG_TTS_MODEL,
-            "http_url": f"https://api.slng.ai{SLNG_TTS_PATH}",
+            "http_url": SLNG_TTS_HTTP_URL,
             "websocket_url": f"wss://api.slng.ai{SLNG_TTS_PATH}",
             "request": {
                 "speaker": "luna",
@@ -537,6 +540,85 @@ def voice_session(playbook_id: str | None, language: str = "en") -> dict[str, An
         "auth_note": "Browser WebSocket clients cannot set Authorization headers; proxy through the backend or pass a short-lived token as a query parameter.",
         "api_key_present": api_key_present,
     }
+
+
+def extract_slng_transcript(payload: dict[str, Any]) -> str:
+    for key in ("text", "transcript"):
+        value = payload.get(key)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+
+    results = payload.get("results")
+    if isinstance(results, dict):
+        channels = results.get("channels")
+        if isinstance(channels, list):
+            alternatives = []
+            for channel in channels:
+                if isinstance(channel, dict):
+                    alternatives.extend(channel.get("alternatives", []))
+            for alternative in alternatives:
+                if isinstance(alternative, dict):
+                    transcript = alternative.get("transcript")
+                    if isinstance(transcript, str) and transcript.strip():
+                        return transcript.strip()
+
+    raise ValueError("SLNG transcription response did not include transcript text.")
+
+
+def transcribe_audio_with_slng(
+    audio: bytes,
+    filename: str,
+    content_type: str | None,
+    language: str = "en",
+) -> dict[str, Any]:
+    if not settings.SLNG_API_KEY:
+        raise ValueError("Set LOU_SLNG_API_KEY or SLNG_API_KEY to enable recorded-audio transcription.")
+    if not audio:
+        raise ValueError("Recorded audio was empty.")
+
+    selected_language = normalize_language(language)
+    upload_name = filename or "lou-recording.webm"
+    upload_type = content_type or "application/octet-stream"
+
+    try:
+        with httpx.Client(timeout=60) as client:
+            response = client.post(
+                SLNG_STT_HTTP_URL,
+                headers={"Authorization": f"Bearer {settings.SLNG_API_KEY}"},
+                files={"audio": (upload_name, audio, upload_type)},
+                data={"language": selected_language},
+            )
+            response.raise_for_status()
+    except httpx.HTTPStatusError as error:
+        detail = error.response.text[:500]
+        raise ValueError(f"SLNG transcription failed with {error.response.status_code}: {detail}") from error
+    except httpx.HTTPError as error:
+        raise ValueError(f"SLNG transcription request failed: {error}") from error
+
+    payload = response.json()
+    transcript = extract_slng_transcript(payload)
+    return {
+        "provider": "SLNG",
+        "mode": "slng-audio",
+        "language": selected_language,
+        "transcript": transcript,
+        "raw": payload,
+    }
+
+
+def transcribe_audio_to_updates(
+    playbook_id: str,
+    audio: bytes,
+    filename: str,
+    content_type: str | None,
+    language: str = "en",
+) -> dict[str, Any]:
+    transcription = transcribe_audio_with_slng(audio, filename, content_type, language)
+    result = transcript_to_updates(playbook_id, transcription["transcript"], transcription["language"])
+    result["mode"] = transcription["mode"]
+    result["provider"] = transcription["provider"]
+    result["transcript"] = transcription["transcript"]
+    return result
 
 
 def transcript_to_updates(playbook_id: str, transcript: str, language: str = "en") -> dict[str, Any]:

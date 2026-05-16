@@ -134,6 +134,8 @@ export interface AnalyzeResponse {
 export interface VoiceTranscriptResponse {
   mode: string;
   language: string;
+  provider?: string;
+  transcript?: string;
   proposed_updates: Proposal[];
 }
 

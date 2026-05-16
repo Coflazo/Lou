@@ -176,6 +176,40 @@ def test_voice_transcript_creates_proposed_updates():
     assert len(body["proposed_updates"]) >= 1
 
 
+def test_voice_audio_upload_transcribes_with_slng_and_creates_updates(monkeypatch):
+    login("JUNIOR")
+    playbook = client.get("/api/playbooks").json()[0]
+
+    def fake_transcribe_audio_with_slng(audio, filename, content_type, language):
+        assert audio == b"fake webm audio"
+        assert filename == "voice.webm"
+        assert content_type == "audio/webm"
+        assert language == "nl"
+        return {
+            "provider": "SLNG",
+            "mode": "slng-audio",
+            "language": language,
+            "transcript": "Partner says residual knowledge should exclude pricing.",
+            "raw": {"transcript": "Partner says residual knowledge should exclude pricing."},
+        }
+
+    monkeypatch.setattr(services, "transcribe_audio_with_slng", fake_transcribe_audio_with_slng)
+
+    response = client.post(
+        "/api/voice/transcribe-audio",
+        data={"playbook_id": playbook["id"], "language": "nl"},
+        files={"file": ("voice.webm", b"fake webm audio", "audio/webm")},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["provider"] == "SLNG"
+    assert body["mode"] == "slng-audio"
+    assert body["language"] == "nl"
+    assert "residual knowledge" in body["transcript"]
+    assert len(body["proposed_updates"]) >= 1
+
+
 def test_review_permissions_and_approval_commit_updates_graph():
     login("JUNIOR")
     pending = client.get("/api/review")

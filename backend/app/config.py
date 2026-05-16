@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
@@ -8,6 +9,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 ROOT = Path(__file__).resolve().parents[2]
+
+for key in ("OPENAI_API_KEY", "SLNG_API_KEY"):
+    prefixed = f"LOU_{key}"
+    if prefixed not in os.environ and key in os.environ:
+        os.environ[prefixed] = os.environ[key]
 
 
 class Settings(BaseSettings):
