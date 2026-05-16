@@ -916,11 +916,18 @@ def transcribe_audio_with_slng(
     upload_type = content_type or "application/octet-stream"
 
     try:
+        # `model` must be explicit; SLNG/Deepgram falls back to "latest" which
+        # the Nova endpoint refuses. Sent as both form field and query string
+        # because SLNG's Nova proxy reads it from the query, while other
+        # upstream STT routes read it from the body.
+        request_model = settings.SLNG_STT_REQUEST_MODEL
         response = httpx.post(
             _slng_stt_http_url(),
             headers={"Authorization": f"Bearer {slng_key}"},
+            params={"model": request_model},
             files={"audio": (upload_name, audio, upload_type)},
             data={
+                "model": request_model,
                 "language": selected_language,
                 "diarize": "true",
                 "punctuate": "true",

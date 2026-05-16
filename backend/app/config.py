@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     SLNG_API_BASE_HTTP: str = "https://api.slng.ai"
     SLNG_API_BASE_WS: str = "wss://api.slng.ai"
     SLNG_STT_MODEL: str = "deepgram/nova:3"
+    # SLNG forwards to Deepgram; without `model` in the form body Deepgram
+    # defaults to "latest" which is not valid for the Nova-3 endpoint.
+    SLNG_STT_REQUEST_MODEL: str = "nova-3"
     SLNG_TTS_MODEL: str = "slng/rime/arcana:3-en"
     # Optional direct overrides — when set, the full URL is used as-is instead
     # of constructing one from SLNG_API_BASE_HTTP + SLNG_STT_MODEL.

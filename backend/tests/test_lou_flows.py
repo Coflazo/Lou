@@ -254,7 +254,7 @@ def test_request_scoped_provider_keys_override_settings_for_one_request(monkeypa
     playbook = client.get("/api/playbooks").json()[0]
     monkeypatch.setattr(services.settings, "SLNG_API_KEY", "env-slng")
 
-    def fake_post(url, *, headers, files, data, timeout):
+    def fake_post(url, *, headers, files, data, timeout, params=None):
         seen.append(headers["Authorization"])
 
         class FakeResponse:
