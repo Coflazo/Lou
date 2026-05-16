@@ -34,7 +34,14 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   });
   if (!response.ok) {
     const detail = await response.text();
-    throw new ApiError(response.status, detail || `Request failed with ${response.status}`);
+    let message = detail;
+    try {
+      const parsed = JSON.parse(detail) as { detail?: unknown };
+      if (typeof parsed.detail === "string") message = parsed.detail;
+    } catch {
+      // Keep the original response text when the backend does not return JSON.
+    }
+    throw new ApiError(response.status, message || `Request failed with ${response.status}`);
   }
   const contentType = response.headers.get("content-type") ?? "";
   if (contentType.includes("application/json")) {
@@ -83,12 +90,19 @@ export const api = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
-  voiceAudioTranscript: ({ playbook_id, language, file }: { playbook_id: string; language?: string; file: Blob }) => {
+  voiceAudioTranscript: async ({ playbook_id, language, file }: { playbook_id: string; language?: string; file: Blob }) => {
     const form = new FormData();
     form.append("playbook_id", playbook_id);
     form.append("language", language ?? "en");
     form.append("file", file, "lou-recording.webm");
-    return request<VoiceTranscriptResponse>("/api/voice/transcribe-audio", { method: "POST", body: form });
+    try {
+      return await request<VoiceTranscriptResponse>("/api/voice/transcribe-audio", { method: "POST", body: form });
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 404) {
+        throw new ApiError(404, "Audio transcription route is not available. Restart the Lou backend and reload the app.");
+      }
+      throw error;
+    }
   },
   listReview: () => request<Proposal[]>("/api/review"),
   approveProposal: (proposalId: string, editedText?: string | null) =>

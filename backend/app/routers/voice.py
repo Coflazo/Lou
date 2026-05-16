@@ -22,6 +22,7 @@ def create_voice_transcript(payload: VoiceTranscriptRequest):
     return transcript_to_updates(payload.playbook_id, payload.transcript, payload.language)
 
 
+@router.post("/api/voice/audio-transcript")
 @router.post("/api/voice/transcribe-audio")
 async def create_voice_audio_transcript(
     playbook_id: str = Form(...),

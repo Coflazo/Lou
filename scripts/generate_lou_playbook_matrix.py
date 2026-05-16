@@ -252,12 +252,13 @@ def generate_rows_for_playbook(
     signatures = set()
     request_index = 0
     empty_attempts = 0
-    max_empty_attempts = 8
+    max_empty_attempts = 12
 
     while len(rows) < row_count:
         request_index += 1
-        current = min(batch_size, row_count - len(rows))
-        existing_topics = [row["Topic"] for row in rows[-20:]]
+        remaining = row_count - len(rows)
+        current = batch_size if remaining > batch_size else min(20, max(batch_size, remaining * 3))
+        existing_topics = [row["Topic"] for row in rows]
         messages = [
             {
                 "role": "system",
@@ -268,17 +269,44 @@ def generate_rows_for_playbook(
                 "content": (
                     f"Generate {current} rows for this legal playbook: {json.dumps(playbook)}. "
                     f"This is request {request_index}. Already accepted {len(rows)} of {row_count} rows. "
-                    f"Do not duplicate these recent topics: {json.dumps(existing_topics)}. "
+                    f"I still need {remaining} new accepted rows. You may return extra candidates. "
+                    f"Do not duplicate any of these accepted topics: {json.dumps(existing_topics)}. "
                     "Each row must contain exactly these string fields: "
                     f"{', '.join(ROW_COLUMNS)}. "
                     "Each row pattern is: one preferred position, three progressively less preferred but acceptable fallbacks, "
                     "one red line requiring escalation, and one deal breaker that is unacceptable. "
                     "Rows must be concrete, varied, concise, and usable by a commercial legal team. "
+                    "If this is late in the sequence, invent narrow non-overlapping subtopics, edge cases, exceptions, "
+                    "jurisdictional variants, operational obligations, remedies, audit mechanics, notice mechanics, "
+                    "or sector-specific positions instead of restating earlier topics. "
                     'Return only {"items":[{...}]}.'
                 ),
             },
         ]
-        result = pioneer_chat(messages, model, api_key, max_tokens=8192)
+        try:
+            result = pioneer_chat(messages, model, api_key, max_tokens=8192)
+        except json.JSONDecodeError as error:
+            batches.append(
+                {
+                    "playbook": playbook,
+                    "request": request_index,
+                    "requested": current,
+                    "received": "invalid_json",
+                    "accepted": 0,
+                    "error": str(error),
+                }
+            )
+            empty_attempts += 1
+            if empty_attempts >= max_empty_attempts:
+                raise ValueError(
+                    f"{playbook['name']}: Pioneer returned malformed row JSON after {len(rows)} of {row_count} rows."
+                ) from error
+            print(
+                f"[pioneer] {playbook['name']} returned malformed row JSON; retrying {empty_attempts}/{max_empty_attempts}",
+                file=sys.stderr,
+            )
+            time.sleep(0.25)
+            continue
         items = result["parsed"].get("items", [])
         if not isinstance(items, list):
             rows_value = result["parsed"].get("rows", [])
