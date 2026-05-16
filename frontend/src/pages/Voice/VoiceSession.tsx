@@ -1,22 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Microphone, Stop } from "@phosphor-icons/react";
+import { ArrowsIn, ArrowsOut, Microphone, Stop } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/layout";
 import { Button, Select, Textarea } from "@/components/primitives";
 import { VoiceOrb, WaveformViz, TranscriptRoll, type TranscriptSegment } from "@/components/voice";
 import { ProposalCard } from "@/components/data";
 import { useCreateReviewProposal, usePlaybooks, useVoiceAudioTranscript, useVoiceContractFromNotes, useVoiceTranscript } from "@/hooks/useApi";
 import { useVoiceRecorder } from "@/hooks/useVoice";
-import { COPY } from "@/lib/constants";
+import { COPY, DEMO_TRANSCRIPT_FALLBACK, VOICE_LANGUAGES } from "@/lib/constants";
 import type { Proposal } from "@/types";
 
-const LANGS = [
-  { value: "en", label: "English" },
-  { value: "fr", label: "French" },
-  { value: "nl", label: "Dutch" },
-  { value: "de", label: "German" },
-];
+const LANGUAGE_LABELS: Record<(typeof VOICE_LANGUAGES)[number], string> = {
+  en: "English",
+  fr: "French",
+  nl: "Dutch",
+  de: "German",
+};
+const LANGS = VOICE_LANGUAGES.map((value) => ({ value, label: LANGUAGE_LABELS[value] }));
 
 export function VoiceSessionPage() {
   const playbooks = usePlaybooks();
@@ -29,15 +31,28 @@ export function VoiceSessionPage() {
   const lastTranscribedBlob = useRef<Blob | null>(null);
   const [playbookId, setPlaybookId] = useState<string>("");
   const [language, setLanguage] = useState<string>("en");
-  const [transcript, setTranscript] = useState<string>(
-    "Partner insists residual knowledge carve-out should be acceptable if it excludes source code and pricing.",
-  );
+  const [transcript, setTranscript] = useState<string>(DEMO_TRANSCRIPT_FALLBACK);
   const [segments, setSegments] = useState<TranscriptSegment[]>([]);
   const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [fullscreen, setFullscreen] = useState(false);
 
   useEffect(() => {
     if (!playbookId && playbooks.data?.[0]) setPlaybookId(playbooks.data[0].id);
   }, [playbookId, playbooks.data]);
+
+  useEffect(() => {
+    if (!fullscreen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setFullscreen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [fullscreen]);
 
   const orbActive = recorder.state === "listening";
   const orbAmp = useMemo(() => Math.min(1, recorder.amplitude), [recorder.amplitude]);
@@ -83,130 +98,218 @@ export function VoiceSessionPage() {
   }, [language, playbookId, recorder.blob, transcribeAudio]);
 
   return (
-    <div className="flex flex-col gap-8">
-      <PageHeader eyebrow="Listening mode" title={COPY.VOICE.TITLE} subtitle={COPY.VOICE.SUBTITLE} />
+    <>
+      <div className="flex flex-col gap-8">
+        <PageHeader
+          eyebrow="Listening mode"
+          title={COPY.VOICE.TITLE}
+          subtitle={COPY.VOICE.SUBTITLE}
+          actions={
+            <Button
+              variant="secondary"
+              size="sm"
+              iconLeft={<ArrowsOut size={14} />}
+              onClick={() => setFullscreen(true)}
+              className="md:hidden"
+            >
+              Fullscreen
+            </Button>
+          }
+        />
 
-      <section className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
-        <div className="rounded-[24px] bg-ink text-paper p-8 flex flex-col gap-6">
-          <header className="flex items-center justify-between">
-            <span className="font-mono text-xs uppercase tracking-[0.2em] text-[color:var(--color-amber)]">
-              {orbActive ? COPY.VOICE.LISTENING : COPY.VOICE.IDLE}
-            </span>
-            <Select
-              label="Language"
-              value={language}
-              onChange={setLanguage}
-              options={LANGS}
-              className="w-40 [&_button]:bg-[color:var(--color-ink-soft)] [&_button]:text-paper"
-            />
-          </header>
+        <section className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
+          <div className="rounded-[24px] bg-ink text-paper p-6 md:p-8 flex flex-col gap-6">
+            <header className="flex items-center justify-between gap-3">
+              <span className="font-mono text-xs uppercase tracking-[0.2em] text-[color:var(--color-amber)]">
+                {orbActive ? COPY.VOICE.LISTENING : COPY.VOICE.IDLE}
+              </span>
+              <Select
+                label="Language"
+                value={language}
+                onChange={setLanguage}
+                options={LANGS}
+                className="w-32 sm:w-40 [&_button]:bg-[color:var(--color-ink-soft)] [&_button]:text-paper"
+              />
+            </header>
 
-          <div className="flex flex-col items-center gap-6 my-6">
-            <VoiceOrb amplitude={orbAmp} active={orbActive} />
-            <WaveformViz amplitude={orbAmp} active={orbActive} className="max-w-md" />
-          </div>
+            <div className="flex flex-col items-center gap-6 my-6">
+              <VoiceOrb amplitude={orbAmp} active={orbActive} />
+              <WaveformViz amplitude={orbAmp} active={orbActive} className="max-w-md" />
+            </div>
 
-          <div className="flex flex-col gap-3">
-            {recorder.error && <p className="text-sm text-[color:var(--color-red)]">{recorder.error}</p>}
-            {transcribeAudio.error && (
-              <p className="text-sm text-[color:var(--color-red)]">
-                {transcribeAudio.error instanceof Error ? transcribeAudio.error.message : "SLNG transcription failed."}
-              </p>
-            )}
-            {createContract.error && (
-              <p className="text-sm text-[color:var(--color-red)]">
-                {createContract.error instanceof Error ? createContract.error.message : "Contract generation failed."}
-              </p>
-            )}
-            <div className="flex items-center justify-center gap-3">
-              {!orbActive ? (
-                <Button size="lg" iconLeft={<Microphone size={16} weight="fill" />} onClick={recorder.start}>
-                  {COPY.VOICE.START}
-                </Button>
-              ) : (
-                <Button size="lg" variant="danger" iconLeft={<Stop size={16} weight="fill" />} onClick={recorder.stop}>
-                  {COPY.VOICE.STOP}
-                </Button>
+            <div className="flex flex-col gap-3">
+              {recorder.error && <p className="text-sm text-[color:var(--color-red)]">{recorder.error}</p>}
+              {transcribeAudio.error && (
+                <p className="text-sm text-[color:var(--color-red)]">
+                  {transcribeAudio.error instanceof Error ? transcribeAudio.error.message : "SLNG transcription failed."}
+                </p>
               )}
-              {recorder.blobUrl && (
-                <audio controls src={recorder.blobUrl} className="rounded-[8px]" />
+              {createContract.error && (
+                <p className="text-sm text-[color:var(--color-red)]">
+                  {createContract.error instanceof Error ? createContract.error.message : "Contract generation failed."}
+                </p>
+              )}
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                {!orbActive ? (
+                  <Button size="lg" iconLeft={<Microphone size={16} weight="fill" />} onClick={recorder.start}>
+                    {COPY.VOICE.START}
+                  </Button>
+                ) : (
+                  <Button size="lg" variant="danger" iconLeft={<Stop size={16} weight="fill" />} onClick={recorder.stop}>
+                    {COPY.VOICE.STOP}
+                  </Button>
+                )}
+                {recorder.blobUrl && (
+                  <audio
+                    controls
+                    src={recorder.blobUrl}
+                    aria-label="Recorded voice playback"
+                    className="rounded-[8px] max-w-full"
+                  />
+                )}
+              </div>
+              {transcribeAudio.isPending && (
+                <p className="text-center text-sm text-[color:var(--color-amber)]">Transcribing with SLNG...</p>
               )}
             </div>
-            {transcribeAudio.isPending && (
-              <p className="text-center text-sm text-[color:var(--color-amber)]">Transcribing with SLNG...</p>
-            )}
           </div>
-        </div>
 
-        <div className="rounded-[24px] bg-surface-raised border border-[color:var(--border-soft)] p-6 flex flex-col gap-4">
-          <Select
-            label="Playbook"
-            value={playbookId}
-            onChange={setPlaybookId}
-            options={
-              playbooks.data?.map((playbook) => ({
-                value: playbook.id,
-                label: playbook.name,
-                description: playbook.category,
-              })) ?? []
-            }
-          />
-          <Textarea
-            label={COPY.VOICE.TRANSCRIPT_FALLBACK}
-            value={transcript}
-            onChange={(event) => setTranscript(event.target.value)}
-            rows={8}
-          />
-          <Button onClick={submit} loading={transcribe.isPending || transcribeAudio.isPending}>
-            Create proposals
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={generateContractFromNotes}
-            loading={createContract.isPending}
-            disabled={!transcript.trim() || !playbookId}
+          <div className="rounded-[24px] bg-surface-raised border border-[color:var(--border-soft)] p-6 flex flex-col gap-4">
+            <Select
+              label="Playbook"
+              value={playbookId}
+              onChange={setPlaybookId}
+              options={
+                playbooks.data?.map((playbook) => ({
+                  value: playbook.id,
+                  label: playbook.name,
+                  description: playbook.category,
+                })) ?? []
+              }
+            />
+            <Textarea
+              label={COPY.VOICE.TRANSCRIPT_FALLBACK}
+              value={transcript}
+              onChange={(event) => setTranscript(event.target.value)}
+              rows={8}
+            />
+            <Button onClick={submit} loading={transcribe.isPending || transcribeAudio.isPending}>
+              Create proposals
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={generateContractFromNotes}
+              loading={createContract.isPending}
+              disabled={!transcript.trim() || !playbookId}
+            >
+              Generate contract from notes
+            </Button>
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-6">
+          <aside className="rounded-[18px] bg-surface-raised border border-[color:var(--border-soft)] p-5 max-h-[60vh] overflow-y-auto">
+            <h3 className="text-xl mb-3">Transcript</h3>
+            <TranscriptRoll segments={segments} listening={orbActive} />
+          </aside>
+          <div className="flex flex-col gap-3">
+            <h3 className="text-xl">Suggested proposals</h3>
+            <AnimatePresence>
+              {proposals.length === 0 && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-base text-[color:var(--color-warm-gray)]"
+                >
+                  {COPY.VOICE.NO_MATCHES}
+                </motion.p>
+              )}
+              {proposals.map((proposal) => (
+                <ProposalCard
+                  key={proposal.id}
+                  proposal={proposal}
+                  actions={
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      loading={createReviewProposal.isPending && createReviewProposal.variables?.topic === proposal.topic}
+                      onClick={() => createReviewProposal.mutate(proposal)}
+                    >
+                      Send to review
+                    </Button>
+                  }
+                />
+              ))}
+            </AnimatePresence>
+          </div>
+        </section>
+      </div>
+
+      {fullscreen &&
+        createPortal(
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Voice session fullscreen"
+            className="fixed inset-0 z-[60] bg-paper text-ink flex flex-col md:hidden"
           >
-            Generate contract from notes
-          </Button>
-        </div>
-      </section>
-
-      <section className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-6">
-        <aside className="rounded-[18px] bg-surface-raised border border-[color:var(--border-soft)] p-5 max-h-[60vh] overflow-y-auto">
-          <h3 className="text-xl mb-3">Transcript</h3>
-          <TranscriptRoll segments={segments} listening={orbActive} />
-        </aside>
-        <div className="flex flex-col gap-3">
-          <h3 className="text-xl">Suggested proposals</h3>
-          <AnimatePresence>
-            {proposals.length === 0 && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-base text-[color:var(--color-warm-gray)]"
+            <header className="flex items-center justify-between px-4 h-14 border-b border-[color:var(--border-soft)] bg-surface-base/95 backdrop-blur sticky top-0">
+              <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] text-[color:var(--color-warm-gray)]">
+                <span className={orbActive ? "h-2 w-2 rounded-full bg-[color:var(--color-amber)] animate-pulse" : "h-2 w-2 rounded-full bg-[color:var(--border-strong)]"} />
+                {orbActive ? "Listening" : "Idle"} · {LANGUAGE_LABELS[language as keyof typeof LANGUAGE_LABELS] ?? language}
+              </div>
+              <button
+                type="button"
+                onClick={() => setFullscreen(false)}
+                aria-label="Exit fullscreen"
+                className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-[10px] hover:bg-surface-sunken"
               >
-                {COPY.VOICE.NO_MATCHES}
-              </motion.p>
-            )}
-            {proposals.map((proposal) => (
-              <ProposalCard
-                key={proposal.id}
-                proposal={proposal}
-                actions={
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    loading={createReviewProposal.isPending && createReviewProposal.variables?.topic === proposal.topic}
-                    onClick={() => createReviewProposal.mutate(proposal)}
-                  >
-                    Send to review
-                  </Button>
-                }
-              />
-            ))}
-          </AnimatePresence>
-        </div>
-      </section>
-    </div>
+                <ArrowsIn size={20} />
+              </button>
+            </header>
+
+            <div className="flex-shrink-0 flex flex-col items-center gap-3 py-6">
+              <VoiceOrb amplitude={orbAmp} active={orbActive} />
+              <WaveformViz amplitude={orbAmp} active={orbActive} className="max-w-md px-4 w-full" />
+            </div>
+
+            <section className="flex-1 overflow-y-auto px-4 pb-3">
+              <h3 className="text-lg mb-3">Transcript</h3>
+              <TranscriptRoll segments={segments} listening={orbActive} />
+            </section>
+
+            <footer className="flex-shrink-0 border-t border-[color:var(--border-soft)] bg-surface-raised px-4 pt-3 pb-[max(env(safe-area-inset-bottom),12px)] flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <Select
+                  value={language}
+                  onChange={setLanguage}
+                  options={LANGS}
+                  className="flex-1"
+                />
+                <Button
+                  size="lg"
+                  variant={orbActive ? "danger" : "primary"}
+                  iconLeft={orbActive ? <Stop size={18} weight="fill" /> : <Microphone size={18} weight="fill" />}
+                  onClick={orbActive ? recorder.stop : recorder.start}
+                >
+                  {orbActive ? "Stop" : "Listen"}
+                </Button>
+              </div>
+              <Button
+                onClick={submit}
+                loading={transcribe.isPending || transcribeAudio.isPending}
+                disabled={!playbookId || !transcript.trim()}
+              >
+                Send to playbook
+              </Button>
+            </footer>
+          </motion.div>,
+          document.body,
+        )}
+    </>
   );
 }

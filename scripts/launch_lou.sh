@@ -41,14 +41,18 @@ port_has_http() {
   curl -fsS "$url" >/dev/null 2>&1
 }
 
+# Keys are collected into BACKEND_ENV and only passed to the backend process
+# (via `env`). Frontend build/preview, npm tests, and pytest never see them.
+BACKEND_ENV=()
+
 load_keys() {
   if [[ -f "$ROOT_DIR/api-keys.txt" ]]; then
     while IFS='=' read -r key value; do
       [[ -z "${key// }" ]] && continue
       [[ "$key" == \#* ]] && continue
-      export "$key=$value"
+      BACKEND_ENV+=("$key=$value")
       if [[ "$key" != LOU_* ]]; then
-        export "LOU_${key}=$value"
+        BACKEND_ENV+=("LOU_${key}=$value")
       fi
     done < "$ROOT_DIR/api-keys.txt"
   fi
@@ -124,7 +128,7 @@ else
     fail "Port $BACKEND_PORT is in use by a non-Lou process. Stop it or set BACKEND_PORT."
   fi
   log "Starting backend on $BACKEND_URL"
-  PYTHONPATH=backend uvicorn app.main:app --host 0.0.0.0 --port "$BACKEND_PORT" >"$LOG_DIR/backend.log" 2>&1 &
+  env "${BACKEND_ENV[@]}" PYTHONPATH=backend uvicorn app.main:app --host 0.0.0.0 --port "$BACKEND_PORT" >"$LOG_DIR/backend.log" 2>&1 &
   BACKEND_PID="$!"
   wait_for_url "$BACKEND_URL/api/health" "Backend"
 fi

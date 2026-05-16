@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { WAVEFORM_BARS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface WaveformVizProps {
@@ -29,7 +30,7 @@ export function WaveformViz({ amplitude, active, className }: WaveformVizProps) 
     canvas.height = canvas.clientHeight * dpr;
     ctx.scale(dpr, dpr);
 
-    const bars = 56;
+    const bars = WAVEFORM_BARS;
     function draw() {
       if (!canvas || !ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);

@@ -1,0 +1,304 @@
+{
+  "contracts": [
+    {
+      "playbook_id": "pb-01-nda-negotiation-and-enforcement-playbook",
+      "playbook_code": "PB01",
+      "playbook_name": "PB01 - NDA Negotiation and Enforcement Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB01 - NDA Negotiation and Enforcement Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-02-saas-contract-lifecycle-management-playbook",
+      "playbook_code": "PB02",
+      "playbook_name": "PB02 - SaaS Contract Lifecycle Management Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB02 - SaaS Contract Lifecycle Management Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-03-data-processing-agreement-dpa-framework-playbook",
+      "playbook_code": "PB03",
+      "playbook_name": "PB03 - Data Processing Agreement (DPA) Framework Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB03 - Data Processing Agreement DPA Framework Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-04-ai-vendor-risk-assessment-playbook",
+      "playbook_code": "PB04",
+      "playbook_name": "PB04 - AI Vendor Risk Assessment Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB04 - AI Vendor Risk Assessment Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-05-cybersecurity-compliance-and-incident-response-playboo",
+      "playbook_code": "PB05",
+      "playbook_name": "PB05 - Cybersecurity Compliance and Incident Response Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB05 - Cybersecurity Compliance and Incident Response Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-06-procurement-contract-optimization-playbook",
+      "playbook_code": "PB06",
+      "playbook_name": "PB06 - Procurement Contract Optimization Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB06 - Procurement Contract Optimization Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-07-service-level-agreement-sla-design-playbook",
+      "playbook_code": "PB07",
+      "playbook_name": "PB07 - Service Level Agreement (SLA) Design Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB07 - Service Level Agreement SLA Design Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-08-reseller-agreement-compliance-playbook",
+      "playbook_code": "PB08",
+      "playbook_name": "PB08 - Reseller Agreement Compliance Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB08 - Reseller Agreement Compliance Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-09-ip-licensing-strategy-and-management-playbook",
+      "playbook_code": "PB09",
+      "playbook_name": "PB09 - IP Licensing Strategy and Management Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB09 - IP Licensing Strategy and Management Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-10-cloud-service-provider-due-diligence-playbook",
+      "playbook_code": "PB10",
+      "playbook_name": "PB10 - Cloud Service Provider Due Diligence Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB10 - Cloud Service Provider Due Diligence Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-11-security-compliance-and-incident-response-playbook",
+      "playbook_code": "PB11",
+      "playbook_name": "PB11 - Security Compliance and Incident Response Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB11 - Security Compliance and Incident Response Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-12-support-service-level-agreement-sla-design-playbook",
+      "playbook_code": "PB12",
+      "playbook_name": "PB12 - Support Service Level Agreement (SLA) Design Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB12 - Support Service Level Agreement SLA Design Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-13-ai-vendor-audit-and-compliance-playbook",
+      "playbook_code": "PB13",
+      "playbook_name": "PB13 - AI Vendor Audit and Compliance Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB13 - AI Vendor Audit and Compliance Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-14-open-source-software-risk-management-playbook",
+      "playbook_code": "PB14",
+      "playbook_name": "PB14 - Open Source Software Risk Management Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB14 - Open Source Software Risk Management Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-15-export-control-compliance-playbook",
+      "playbook_code": "PB15",
+      "playbook_name": "PB15 - Export Control Compliance Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB15 - Export Control Compliance Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-16-subcontractor-due-diligence-and-management-playbook",
+      "playbook_code": "PB16",
+      "playbook_name": "PB16 - Subcontractor Due Diligence and Management Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB16 - Subcontractor Due Diligence and Management Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-17-public-sector-contract-compliance-playbook",
+      "playbook_code": "PB17",
+      "playbook_name": "PB17 - Public Sector Contract Compliance Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB17 - Public Sector Contract Compliance Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-18-payment-terms-and-dispute-resolution-playbook",
+      "playbook_code": "PB18",
+      "playbook_name": "PB18 - Payment Terms and Dispute Resolution Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB18 - Payment Terms and Dispute Resolution Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-19-termination-clause-design-and-enforcement-playbook",
+      "playbook_code": "PB19",
+      "playbook_name": "PB19 - Termination Clause Design and Enforcement Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB19 - Termination Clause Design and Enforcement Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-20-liability-limitation-and-indemnity-playbook",
+      "playbook_code": "PB20",
+      "playbook_name": "PB20 - Liability Limitation and Indemnity Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB20 - Liability Limitation and Indemnity Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-21-insurance-procurement-and-compliance-playbook",
+      "playbook_code": "PB21",
+      "playbook_name": "PB21 - Insurance Procurement and Compliance Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB21 - Insurance Procurement and Compliance Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-22-employment-adjacent-commercial-restrictions-playbook",
+      "playbook_code": "PB22",
+      "playbook_name": "PB22 - Employment-Adjacent Commercial Restrictions Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB22 - Employment Adjacent Commercial Restrictions Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-23-ai-vendor-due-diligence-and-performance-evaluation-pla",
+      "playbook_code": "PB23",
+      "playbook_name": "PB23 - AI Vendor Due Diligence and Performance Evaluation Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB23 - AI Vendor Due Diligence and Performance Evaluation Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-24-cloud-data-sovereignty-and-cross-border-data-transfer-",
+      "playbook_code": "PB24",
+      "playbook_name": "PB24 - Cloud Data Sovereignty and Cross-Border Data Transfer Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB24 - Cloud Data Sovereignty and Cross Border Data Transfer Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-25-privacy-by-design-and-data-minimization-implementation",
+      "playbook_code": "PB25",
+      "playbook_name": "PB25 - Privacy by Design and Data Minimization Implementation Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB25 - Privacy by Design and Data Minimization Implementation Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-26-escrow-agreement-management-and-enforcement-playbook",
+      "playbook_code": "PB26",
+      "playbook_name": "PB26 - Escrow Agreement Management and Enforcement Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB26 - Escrow Agreement Management and Enforcement Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-27-public-sector-contract-negotiation-and-compliance-play",
+      "playbook_code": "PB27",
+      "playbook_name": "PB27 - Public Sector Contract Negotiation and Compliance Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB27 - Public Sector Contract Negotiation and Compliance Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-28-subcontractor-performance-monitoring-and-risk-mitigati",
+      "playbook_code": "PB28",
+      "playbook_name": "PB28 - Subcontractor Performance Monitoring and Risk Mitigation Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB28 - Subcontractor Performance Monitoring and Risk Mitigation Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-29-support-service-level-agreement-sla-customization-and-",
+      "playbook_code": "PB29",
+      "playbook_name": "PB29 - Support Service Level Agreement (SLA) Customization and Review Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB29 - Support Service Level Agreement SLA Customization and Review Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-30-export-control-compliance-and-supply-chain-risk-manage",
+      "playbook_code": "PB30",
+      "playbook_name": "PB30 - Export Control Compliance and Supply Chain Risk Management Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB30 - Export Control Compliance and Supply Chain Risk Management Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-31-nda-template-customization-and-legal-review-playbook",
+      "playbook_code": "PB31",
+      "playbook_name": "PB31 - NDA Template Customization and Legal Review Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB31 - NDA Template Customization and Legal Review Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-32-payment-terms-customization-and-dispute-prevention-pla",
+      "playbook_code": "PB32",
+      "playbook_name": "PB32 - Payment Terms Customization and Dispute Prevention Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB32 - Payment Terms Customization and Dispute Prevention Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-33-ai-vendor-performance-benchmarking-and-evaluation-play",
+      "playbook_code": "PB33",
+      "playbook_name": "PB33 - AI Vendor Performance Benchmarking and Evaluation Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB33 - AI Vendor Performance Benchmarking and Evaluation Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-34-cloud-data-encryption-and-access-control-playbook",
+      "playbook_code": "PB34",
+      "playbook_name": "PB34 - Cloud Data Encryption and Access Control Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB34 - Cloud Data Encryption and Access Control Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-35-reseller-agreement-compliance-and-performance-playbook",
+      "playbook_code": "PB35",
+      "playbook_name": "PB35 - Reseller Agreement Compliance and Performance Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB35 - Reseller Agreement Compliance and Performance Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-36-ai-vendor-contract-optimization-playbook",
+      "playbook_code": "PB36",
+      "playbook_name": "PB36 - AI Vendor Contract Optimization Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB36 - AI Vendor Contract Optimization Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-37-cloud-service-level-agreement-sla-customization-playbo",
+      "playbook_code": "PB37",
+      "playbook_name": "PB37 - Cloud Service Level Agreement (SLA) Customization Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB37 - Cloud Service Level Agreement SLA Customization Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-38-data-subject-access-request-dsar-management-playbook",
+      "playbook_code": "PB38",
+      "playbook_name": "PB38 - Data Subject Access Request (DSAR) Management Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB38 - Data Subject Access Request DSAR Management Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-39-export-control-compliance-audit-playbook",
+      "playbook_code": "PB39",
+      "playbook_name": "PB39 - Export Control Compliance Audit Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB39 - Export Control Compliance Audit Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-40-intellectual-property-ip-infringement-mitigation-playb",
+      "playbook_code": "PB40",
+      "playbook_name": "PB40 - Intellectual Property (IP) Infringement Mitigation Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB40 - Intellectual Property IP Infringement Mitigation Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-41-nda-template-standardization-and-review-playbook",
+      "playbook_code": "PB41",
+      "playbook_name": "PB41 - NDA Template Standardization and Review Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB41 - NDA Template Standardization and Review Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-42-public-sector-procurement-compliance-checklist-playboo",
+      "playbook_code": "PB42",
+      "playbook_name": "PB42 - Public Sector Procurement Compliance Checklist Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB42 - Public Sector Procurement Compliance Checklist Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-43-reseller-agreement-performance-evaluation-playbook",
+      "playbook_code": "PB43",
+      "playbook_name": "PB43 - Reseller Agreement Performance Evaluation Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB43 - Reseller Agreement Performance Evaluation Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-44-security-incident-response-and-post-incident-analysis-",
+      "playbook_code": "PB44",
+      "playbook_name": "PB44 - Security Incident Response and Post-Incident Analysis Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB44 - Security Incident Response and Post Incident Analysis Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-45-subcontractor-contract-lifecycle-management-playbook",
+      "playbook_code": "PB45",
+      "playbook_name": "PB45 - Subcontractor Contract Lifecycle Management Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB45 - Subcontractor Contract Lifecycle Management Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-46-ai-vendor-third-party-risk-management-playbook",
+      "playbook_code": "PB46",
+      "playbook_name": "PB46 - AI Vendor Third-Party Risk Management Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB46 - AI Vendor Third Party Risk Management Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-47-cloud-service-provider-performance-monitoring-playbook",
+      "playbook_code": "PB47",
+      "playbook_name": "PB47 - Cloud Service Provider Performance Monitoring Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB47 - Cloud Service Provider Performance Monitoring Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-48-intellectual-property-ip-ownership-clarification-playb",
+      "playbook_code": "PB48",
+      "playbook_name": "PB48 - Intellectual Property (IP) Ownership Clarification Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB48 - Intellectual Property IP Ownership Clarification Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-49-export-control-compliance-training-and-awareness-playb",
+      "playbook_code": "PB49",
+      "playbook_name": "PB49 - Export Control Compliance Training and Awareness Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB49 - Export Control Compliance Training and Awareness Playbook - Contract 01 Demo Agreement.pdf"
+    },
+    {
+      "playbook_id": "pb-50-public-sector-contract-compliance-audit-playbook",
+      "playbook_code": "PB50",
+      "playbook_name": "PB50 - Public Sector Contract Compliance Audit Playbook",
+      "path": "/Users/pc/Desktop/Lou/demo-data/generated-contract-pdfs-50x50/PB50 - Public Sector Contract Compliance Audit Playbook - Contract 01 Demo Agreement.pdf"
+    }
+  ]
+}

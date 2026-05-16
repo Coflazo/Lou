@@ -5,12 +5,13 @@ import re
 
 from openpyxl import load_workbook
 
+from .config import settings
 from .models import Playbook, PlaybookPosition, Proposal, Role
 
 
 ROOT = Path(__file__).resolve().parents[2]
 DEMO_DATA_DIR = ROOT / "demo-data"
-XLSX_PATH = DEMO_DATA_DIR / "siemens-mutual-nda-playbook.xlsx"
+XLSX_PATH = Path(settings.DEMO_PLAYBOOK_XLSX)
 
 
 def ensure_demo_xlsx() -> Path:

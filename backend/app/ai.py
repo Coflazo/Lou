@@ -1,18 +1,20 @@
 from __future__ import annotations
 
 import json
-import os
 from typing import Any
 
 from openai import OpenAI
 
+from .config import settings
+from .provider_keys import current_openai_key
+
 
 def openai_enabled() -> bool:
-    return bool(os.getenv("OPENAI_API_KEY") or os.getenv("LOU_OPENAI_API_KEY"))
+    return bool(current_openai_key())
 
 
 def openai_client() -> OpenAI:
-    return OpenAI(api_key=os.getenv("OPENAI_API_KEY") or os.getenv("LOU_OPENAI_API_KEY"))
+    return OpenAI(api_key=current_openai_key())
 
 
 def parse_command_with_openai(command: str) -> dict[str, Any] | None:
@@ -21,7 +23,7 @@ def parse_command_with_openai(command: str) -> dict[str, Any] | None:
 
     client = openai_client()
     response = client.chat.completions.create(
-        model=os.getenv("LOU_OPENAI_MODEL", "gpt-4.1-mini"),
+        model=settings.OPENAI_MODEL,
         messages=[
             {
                 "role": "system",
@@ -45,7 +47,7 @@ def draft_contract_from_notes(notes: str, playbook_name: str, playbook_category:
 
     client = openai_client()
     response = client.chat.completions.create(
-        model=os.getenv("LOU_OPENAI_MODEL", "gpt-4.1-mini"),
+        model=settings.OPENAI_MODEL,
         messages=[
             {
                 "role": "system",

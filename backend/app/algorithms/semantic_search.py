@@ -26,6 +26,8 @@ from typing import Iterable, Sequence
 import numpy as np
 from rank_bm25 import BM25Okapi
 
+from ..provider_keys import current_openai_key
+
 
 _TOKEN_PATTERN = re.compile(r"(?u)\b[a-z][a-z-]{2,}\b")
 
@@ -56,7 +58,7 @@ class SemanticSearchEngine:
         tokenized = [_tokenize(text) for text in self._texts]
         self._bm25 = BM25Okapi(tokenized, k1=k1, b=b) if any(tokenized) else None
         self._embedding_model = embedding_model
-        self._openai_key = openai_api_key or os.getenv("OPENAI_API_KEY")
+        self._openai_key = openai_api_key or current_openai_key() or os.getenv("OPENAI_API_KEY")
         self._doc_embeddings: np.ndarray | None = None
 
     def _ensure_embeddings(self) -> None:

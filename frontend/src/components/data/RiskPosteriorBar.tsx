@@ -7,13 +7,20 @@ interface RiskPosteriorBarProps {
 }
 
 export function RiskPosteriorBar({ posterior }: RiskPosteriorBarProps) {
+  const summary = posterior.levels
+    .map((label, index) => `${label} ${((posterior.mean[index] ?? 0) * 100).toFixed(0)}%`)
+    .join(", ");
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between font-mono text-xs uppercase tracking-wider text-[color:var(--color-warm-gray)]">
         <span>Risk posture</span>
         <span>{posterior.dominant} dominant</span>
       </div>
-      <div className="flex h-3 w-full rounded-full overflow-hidden bg-surface-sunken">
+      <div
+        role="img"
+        aria-label={`Risk posterior: ${summary}`}
+        className="flex h-3 w-full rounded-full overflow-hidden bg-surface-sunken"
+      >
         {posterior.levels.map((label, index) => {
           const value = posterior.mean[index] ?? 0;
           return (

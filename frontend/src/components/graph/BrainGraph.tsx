@@ -1,5 +1,10 @@
 import { motion } from "framer-motion";
 import { useMemo, useState } from "react";
+import {
+  GRAPH_BRANCH_COLORS,
+  GRAPH_DEFAULT_HEIGHT_PX,
+  GRAPH_DEFAULT_WIDTH_PX,
+} from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import type { BrainNode, MindMapNode } from "@/types";
 
@@ -29,15 +34,15 @@ interface LayoutEdge {
   target: LayoutNode;
 }
 
-const BRANCH_COLORS = [
-  "var(--color-amber)",
-  "var(--color-green)",
-  "var(--color-red)",
-  "var(--color-ink)",
-  "var(--color-warm-gray)",
-];
+const BRANCH_COLORS = GRAPH_BRANCH_COLORS;
 
-export function BrainGraph({ tree, width = 760, height = 520, className, onSelect }: BrainGraphProps) {
+export function BrainGraph({
+  tree,
+  width = GRAPH_DEFAULT_WIDTH_PX,
+  height = GRAPH_DEFAULT_HEIGHT_PX,
+  className,
+  onSelect,
+}: BrainGraphProps) {
   const [hovered, setHovered] = useState<string | null>(null);
   const layout = useMemo(() => layoutMindMap(tree, width, height), [tree, width, height]);
 

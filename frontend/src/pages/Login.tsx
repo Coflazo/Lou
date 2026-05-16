@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight } from "@phosphor-icons/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { COPY, ROLES } from "@/lib/constants";
+import { ALGORITHM_BADGES, COPY, ROLES } from "@/lib/constants";
 import { useLogin } from "@/hooks/useApi";
 import { useCurrentRole, useSetRole } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -70,13 +70,14 @@ export function LoginPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.6 }}
-          className="font-mono text-xs uppercase tracking-[0.2em] text-[color:var(--color-warm-gray)] flex gap-4"
+          className="font-mono text-xs uppercase tracking-[0.2em] text-[color:var(--color-warm-gray)] flex flex-wrap gap-x-4 gap-y-1"
         >
-          <span>Bayesian risk</span>
-          <span>·</span>
-          <span>HMM section detection</span>
-          <span>·</span>
-          <span>TF-IDF clause match</span>
+          {ALGORITHM_BADGES.map((badge, index) => (
+            <span key={badge} className="flex items-center gap-4">
+              {index > 0 && <span>·</span>}
+              <span>{badge}</span>
+            </span>
+          ))}
         </motion.div>
       </section>
 

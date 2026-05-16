@@ -37,8 +37,23 @@ class Settings(BaseSettings):
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
 
     SLNG_API_KEY: str | None = None
+    SLNG_API_BASE_HTTP: str = "https://api.slng.ai"
+    SLNG_API_BASE_WS: str = "wss://api.slng.ai"
+    SLNG_STT_MODEL: str = "deepgram/nova:3"
+    SLNG_TTS_MODEL: str = "slng/rime/arcana:3-en"
+    SLNG_TTS_SPEAKER: str = "luna"
+    SLNG_TTS_SAMPLE_RATE: int = 24000
+    SLNG_TTS_SPEED: float = 1.0
+    SLNG_TTS_GREETING: str = "Lou is listening for proposed playbook updates."
+    SLNG_STT_KEYWORDS: list[str] = Field(
+        default_factory=lambda: ["confidentiality", "residual knowledge", "non-solicit", "data protection"]
+    )
+
     ENABLE_VOICE: bool = True
     VOICE_LANGUAGES: list[str] = Field(default_factory=lambda: ["en", "fr", "nl", "de"])
+
+    DEMO_PLAYBOOK_XLSX: str = str(ROOT / "demo-data" / "siemens-mutual-nda-playbook.xlsx")
+    ALGORITHM_CONFIG_PATH: str = str(Path(__file__).resolve().parent / "algorithms.yaml")
 
     LOG_LEVEL: str = "INFO"
     CORS_ORIGINS: list[str] = Field(
@@ -70,7 +85,10 @@ class Settings(BaseSettings):
 
     BRAIN_CACHE_TTL_SECONDS: int = 300
 
-    @field_validator("CORS_ORIGINS", "VOICE_LANGUAGES", "RISK_LEVELS", mode="before")
+    @field_validator(
+        "CORS_ORIGINS", "VOICE_LANGUAGES", "RISK_LEVELS", "SLNG_STT_KEYWORDS",
+        mode="before",
+    )
     @classmethod
     def _split_csv(cls, value: Any) -> Any:
         if isinstance(value, str):

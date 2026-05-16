@@ -1,0 +1,19 @@
+{
+  "provider": "pioneer",
+  "endpoint": "https://api.pioneer.ai/v1/chat/completions",
+  "schema": [
+    "playbook_id",
+    "playbook_name",
+    "category",
+    "description",
+    "Topic",
+    "Preferred Position",
+    "Fallback 1",
+    "Fallback 2",
+    "Fallback 3",
+    "Red Line",
+    "Deal Breaker"
+  ],
+  "playbooks": 50,
+  "rows_per_playbook": 50
+}

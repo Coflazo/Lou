@@ -102,3 +102,31 @@ export const COPY = {
 } as const;
 
 export const ROLES = ["JUNIOR", "SENIOR", "ADMIN"] as const;
+
+export const TOAST_DURATION_MS = 4200;
+export const SIDEBAR_WIDTH_PX = 240;
+export const SIDEBAR_DRAWER_WIDTH_PX = 288;
+export const MOBILE_BREAKPOINT_PX = 768;
+export const VOICE_LANGUAGES = ["en", "fr", "nl", "de"] as const;
+export const DEMO_TRANSCRIPT_FALLBACK =
+  "Partner insists residual knowledge carve-out should be acceptable if it excludes source code and pricing.";
+export const ALGORITHM_BADGES = [
+  "Bayesian risk",
+  "HMM section detection",
+  "TF-IDF clause match",
+] as const;
+export const CONTRACT_ACCEPT_MIME: Record<string, string[]> = {
+  "application/pdf": [".pdf"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+};
+export const GRAPH_BRANCH_COLORS = [
+  "var(--color-amber)",
+  "var(--color-green)",
+  "var(--color-red)",
+  "var(--color-ink)",
+  "var(--color-warm-gray)",
+] as const;
+export const GRAPH_DEFAULT_WIDTH_PX = 760;
+export const GRAPH_DEFAULT_HEIGHT_PX = 520;
+export const WAVEFORM_BARS = 56;
+export const VOICE_ORB_SIZE_PX = 160;

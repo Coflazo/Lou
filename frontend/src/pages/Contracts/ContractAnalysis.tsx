@@ -53,6 +53,7 @@ export function ContractAnalysisPage() {
         leftWidth="minmax(0, 1.4fr)"
         rightWidth="minmax(0, 1fr)"
         gap="32px"
+        collapseAt="md"
         left={
           <article
             ref={documentRef}

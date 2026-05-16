@@ -89,17 +89,22 @@ def _feature_vector(paragraph: str, position_ratio: float) -> np.ndarray:
     )
 
 
-_W_BEGIN = np.array([-0.2, 3.8, 1.6, 0.4, -0.8, 0.7, 2.1], dtype=float)
-_B_BEGIN = -1.4
+_DEFAULT_W_BEGIN: tuple[float, ...] = (-0.2, 3.8, 1.6, 0.4, -0.8, 0.7, 2.1)
+_DEFAULT_B_BEGIN: float = -1.4
+_DEFAULT_B_INSIDE: float = 0.4
+_DEFAULT_FIRST_PARAGRAPH_BIAS: float = 0.5
 
-_W_INSIDE = -1.0 * _W_BEGIN
-_B_INSIDE = 0.4
 
-
-def _log_emission(features: np.ndarray) -> tuple[float, float]:
+def _log_emission(
+    features: np.ndarray,
+    w_begin: np.ndarray,
+    b_begin: float,
+    w_inside: np.ndarray,
+    b_inside: float,
+) -> tuple[float, float]:
     """Return (log P(features | INSIDE), log P(features | BEGIN)) up to a normalising constant."""
-    z_begin = float(features @ _W_BEGIN + _B_BEGIN)
-    z_inside = float(features @ _W_INSIDE + _B_INSIDE)
+    z_begin = float(features @ w_begin + b_begin)
+    z_inside = float(features @ w_inside + b_inside)
     # Log-softmax for numerical stability.
     m = max(z_begin, z_inside)
     log_norm = m + math.log(math.exp(z_begin - m) + math.exp(z_inside - m))
@@ -112,6 +117,10 @@ class HMMSectionDetector:
     init_begin: float = 0.70
     transition_inside_to_inside: float = 0.90
     transition_begin_to_begin: float = 0.70
+    w_begin: tuple[float, ...] = _DEFAULT_W_BEGIN
+    b_begin: float = _DEFAULT_B_BEGIN
+    b_inside: float = _DEFAULT_B_INSIDE
+    first_paragraph_bias: float = _DEFAULT_FIRST_PARAGRAPH_BIAS
 
     def _log_init(self) -> np.ndarray:
         return np.log(np.array([self.init_inside, self.init_begin], dtype=float))
@@ -130,11 +139,15 @@ class HMMSectionDetector:
         if n == 1:
             return [_BEGIN]
 
+        w_begin = np.array(self.w_begin, dtype=float)
+        w_inside = -1.0 * w_begin
         emissions = np.zeros((n, 2), dtype=float)
         for index, paragraph in enumerate(paragraphs):
             ratio = index / max(n - 1, 1)
             features = _feature_vector(paragraph, ratio)
-            emissions[index, _INSIDE], emissions[index, _BEGIN] = _log_emission(features)
+            emissions[index, _INSIDE], emissions[index, _BEGIN] = _log_emission(
+                features, w_begin, self.b_begin, w_inside, self.b_inside,
+            )
 
         log_init = self._log_init()
         log_trans = self._log_transition()
@@ -143,7 +156,7 @@ class HMMSectionDetector:
         psi = np.zeros((n, 2), dtype=int)
 
         delta[0] = log_init + emissions[0]
-        delta[0, _BEGIN] += 0.5  # mild bias: paragraph 0 is almost always a BEGIN
+        delta[0, _BEGIN] += self.first_paragraph_bias  # mild bias: paragraph 0 is almost always a BEGIN
 
         for t in range(1, n):
             for current in (_INSIDE, _BEGIN):

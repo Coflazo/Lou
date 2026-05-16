@@ -39,8 +39,10 @@ export function Select({ label, value, options, onChange, placeholder = "Select"
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
         className={cn(
-          "flex items-center justify-between gap-3 px-3 py-2.5 rounded-[10px] bg-surface-sunken border-b-2 transition-all",
+          "flex items-center justify-between gap-3 px-3 rounded-[10px] bg-surface-sunken border-b-2 transition-all min-h-11",
           "border-[color:var(--border-soft)] hover:bg-surface-raised",
           open && "border-[color:var(--color-amber)]",
         )}

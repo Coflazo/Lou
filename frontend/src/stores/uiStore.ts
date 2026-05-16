@@ -13,7 +13,9 @@ interface UiState {
 }
 
 export const useUiStore = create<UiState>((set) => ({
-  sidebarOpen: true,
+  // Closed by default on mobile; the Shell opens it as a drawer on hamburger tap
+  // and the sidebar is always visible at >=md regardless of this flag.
+  sidebarOpen: false,
   commandPaletteOpen: false,
   toast: null,
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),

@@ -14,6 +14,8 @@ OUTPUT_DIR = ROOT / "demo-data" / "generated-contract-pdfs"
 CONTRACTS = [
     {
         "slug": "enterprise-saas-subscription",
+        "playbook_code": "PB02",
+        "related_playbook": "PB02 - SaaS Contract Lifecycle Management Playbook",
         "title": "Enterprise SaaS Subscription Agreement",
         "party_a": "Siemens Digital Industries Software GmbH",
         "party_b": "Northwind Analytics Ltd.",
@@ -27,6 +29,8 @@ CONTRACTS = [
     },
     {
         "slug": "mutual-non-disclosure",
+        "playbook_code": "PB01",
+        "related_playbook": "PB01 - NDA Negotiation and Enforcement Playbook",
         "title": "Mutual Non-Disclosure Agreement",
         "party_a": "Siemens Legal Operations",
         "party_b": "Aster Robotics SAS",
@@ -40,6 +44,8 @@ CONTRACTS = [
     },
     {
         "slug": "data-processing-addendum",
+        "playbook_code": "PB03",
+        "related_playbook": "PB03 - Data Processing Agreement (DPA) Framework Playbook",
         "title": "Data Processing Addendum",
         "party_a": "Siemens Smart Infrastructure AG",
         "party_b": "Harbor Cloud Processing Inc.",
@@ -53,6 +59,8 @@ CONTRACTS = [
     },
     {
         "slug": "ai-vendor-evaluation",
+        "playbook_code": "PB04",
+        "related_playbook": "PB04 - AI Vendor Risk Assessment Playbook",
         "title": "AI Vendor Evaluation and Deployment Agreement",
         "party_a": "Siemens Advanta Consulting",
         "party_b": "LumenForge AI BV",
@@ -66,6 +74,8 @@ CONTRACTS = [
     },
     {
         "slug": "professional-services",
+        "playbook_code": "LEGACY-SERVICES",
+        "related_playbook": "Legacy services sample; use the PBxx 50x50 folder for exact playbook pairing",
         "title": "Professional Services Agreement",
         "party_a": "Siemens Energy Global GmbH",
         "party_b": "Delta Program Management LLP",
@@ -79,6 +89,8 @@ CONTRACTS = [
     },
     {
         "slug": "software-license-maintenance",
+        "playbook_code": "PB09",
+        "related_playbook": "PB09 - IP Licensing Strategy and Management Playbook",
         "title": "Software License and Maintenance Agreement",
         "party_a": "Siemens Mobility GmbH",
         "party_b": "VectorSignal Systems AB",
@@ -92,6 +104,8 @@ CONTRACTS = [
     },
     {
         "slug": "master-procurement",
+        "playbook_code": "PB06",
+        "related_playbook": "PB06 - Procurement Contract Optimization Playbook",
         "title": "Master Procurement and Supply Agreement",
         "party_a": "Siemens Healthineers AG",
         "party_b": "Orchid Precision Components Sp. z o.o.",
@@ -105,6 +119,8 @@ CONTRACTS = [
     },
     {
         "slug": "reseller-channel",
+        "playbook_code": "PB08",
+        "related_playbook": "PB08 - Reseller Agreement Compliance Playbook",
         "title": "Reseller and Channel Partner Agreement",
         "party_a": "Siemens Industry Software Inc.",
         "party_b": "Metroline Digital Solutions LLC",
@@ -118,6 +134,8 @@ CONTRACTS = [
     },
     {
         "slug": "cloud-security-addendum",
+        "playbook_code": "PB11",
+        "related_playbook": "PB11 - Security Compliance and Incident Response Playbook",
         "title": "Cloud Security Addendum",
         "party_a": "Siemens Cybersecurity Services",
         "party_b": "BeaconEdge Hosting Oy",
@@ -131,6 +149,8 @@ CONTRACTS = [
     },
     {
         "slug": "public-sector-framework",
+        "playbook_code": "PB17",
+        "related_playbook": "PB17 - Public Sector Contract Compliance Playbook",
         "title": "Public Sector Framework Agreement",
         "party_a": "Siemens Public Sector Solutions GmbH",
         "party_b": "CivicGrid Procurement Authority",
@@ -240,6 +260,7 @@ Governing Law & {escape(contract["law"])}\\
 Venue & {escape(contract["venue"])}\\
 Primary Subject & {escape(contract["subject"])}\\
 Risk Focus & {escape(contract["risk_focus"])}\\
+Related Lou Playbook & {escape(contract["related_playbook"])}\\
 \end{{tabular}}
 \vfill
 \textit{{Generated for Lou contract-review demos. This document is synthetic and should not be used as legal advice.}}
@@ -288,7 +309,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory(prefix="lou-contract-build-") as temp:
         temp_dir = Path(temp)
         for index, contract in enumerate(CONTRACTS, start=1):
-            tex_path = temp_dir / f"{index:02d}-{contract['slug']}.tex"
+            tex_path = temp_dir / f"{contract['playbook_code']}-contract-{contract['slug']}.tex"
             tex_path.write_text(render_contract(contract), encoding="utf-8")
             compile_pdf(tex_path, OUTPUT_DIR)
 

@@ -185,3 +185,26 @@ def test_single_playbook_brain_expands_topics_into_negotiation_logic():
     assert snapshot.tree["kind"] == "playbook"
     assert first_topic["kind"] == "topic"
     assert {"Preferred", "Fallback"}.issubset(child_names)
+
+
+def test_hmm_section_detector_accepts_custom_logistic_weights():
+    detector = HMMSectionDetector(w_begin=(0.0,) * 7, b_begin=-10.0, b_inside=1.0)
+    paragraphs = [
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "Suspendisse potenti. Mauris sodales risus eu lacus.",
+        "Aliquam erat volutpat. Donec posuere felis quis purus tincidunt.",
+    ]
+    path = detector.decode(paragraphs)
+    # With heavily negative b_begin and zero weights, only the forced first
+    # paragraph should be a BEGIN — interior paragraphs should stay INSIDE.
+    assert path[0] == 1
+    assert path[1:] == [0, 0]
+
+
+def test_hmm_section_detector_handles_single_paragraph_contract():
+    detector = HMMSectionDetector()
+    sections = detector.segment(["Single-paragraph NDA body."])
+    assert len(sections) == 1
+    assert sections[0].title
+
+

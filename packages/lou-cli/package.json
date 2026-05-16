@@ -1,0 +1,31 @@
+{
+  "name": "@lou-ai/cli",
+  "version": "0.1.0",
+  "description": "Native Node.js CLI for the Lou legal workspace",
+  "type": "module",
+  "bin": {
+    "lou": "./dist/bin/lou.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "prepack": "npm run build",
+    "pack:dry": "npm pack --dry-run"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
+    "@types/node": "^20.19.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.5"
+  }
+}

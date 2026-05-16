@@ -13,18 +13,30 @@ interface FindingCardProps {
 
 export function FindingCard({ finding, onSelect, active }: FindingCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const detailId = `finding-detail-${finding.id}`;
   return (
     <motion.article
       layout
       layoutId={`finding-${finding.id}`}
       whileHover={{ y: -2 }}
       transition={{ type: "spring", stiffness: 320, damping: 26 }}
+      role="button"
+      tabIndex={0}
+      aria-expanded={expanded}
+      aria-controls={detailId}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect?.(finding);
+          setExpanded((current) => !current);
+        }
+      }}
       onClick={() => {
         onSelect?.(finding);
         setExpanded((current) => !current);
       }}
       className={cn(
-        "cursor-pointer bg-surface-raised border border-[color:var(--border-soft)] rounded-[14px] px-4 py-3 flex flex-col gap-2 transition-colors",
+        "cursor-pointer bg-surface-raised border border-[color:var(--border-soft)] rounded-[14px] px-4 py-3 flex flex-col gap-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-amber)] focus-visible:ring-offset-2",
         active && "border-[color:var(--color-amber)] bg-[color:var(--color-amber-soft)]/35",
         finding.status === "unmapped" && "border-dashed",
       )}
@@ -48,6 +60,7 @@ export function FindingCard({ finding, onSelect, active }: FindingCardProps) {
       <AnimatePresence>
         {expanded && (
           <motion.div
+            id={detailId}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}

@@ -1,0 +1,48 @@
+# Lou algorithm tunables.
+# Path overridable via LOU_ALGORITHM_CONFIG_PATH. All values are loaded once at
+# startup by algorithm_config.py. Numbers here are byte-identical to the
+# previous in-code defaults so existing test snapshots stay green.
+
+clause_matching:
+  min_score: 0.22
+  top_k: 3
+  ngram_range: [1, 2]
+  max_features: 4096
+  sublinear_tf: true
+
+voice_matching:
+  threshold: 0.55
+  weights:
+    jaro_winkler: 0.4
+    tfidf: 0.3
+    edit: 0.3
+
+risk_scoring:
+  prior_alpha: [2.0, 2.0, 2.0]
+  levels: ["Low", "Medium", "High"]
+
+hmm_section_detector:
+  init:
+    inside: 0.30
+    begin: 0.70
+  transition:
+    inside_to_inside: 0.90
+    begin_to_begin: 0.70
+  # 7-element logistic weight vector applied to the feature vector
+  # [relative_position, numbering_pattern_score, all_caps_ratio,
+  #  avg_word_length_norm, log_word_count_norm,
+  #  ends_with_colon, section_keyword_score]
+  logistic:
+    w_begin: [-0.2, 3.8, 1.6, 0.4, -0.8, 0.7, 2.1]
+    b_begin: -1.4
+    b_inside: 0.4
+    first_paragraph_bias: 0.5
+
+semantic_search:
+  bm25:
+    k1: 1.5
+    b: 0.75
+  rrf_k: 60
+
+brain:
+  cache_ttl_seconds: 300

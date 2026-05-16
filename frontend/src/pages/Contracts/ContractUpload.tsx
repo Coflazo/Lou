@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/layout";
 import { Button, Select, Skeleton } from "@/components/primitives";
 import { usePlaybooks, useUploadContract } from "@/hooks/useApi";
-import { COPY } from "@/lib/constants";
+import { CONTRACT_ACCEPT_MIME, COPY } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 export function ContractUploadPage() {
@@ -22,10 +22,7 @@ export function ContractUploadPage() {
   }, [playbookId, playbooks.data]);
 
   const dropzone = useDropzone({
-    accept: {
-      "application/pdf": [".pdf"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
-    },
+    accept: CONTRACT_ACCEPT_MIME,
     multiple: false,
     onDrop: (files) => {
       setError(null);

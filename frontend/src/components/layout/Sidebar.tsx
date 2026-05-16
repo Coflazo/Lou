@@ -9,9 +9,11 @@ import {
   ListChecks,
   type Icon,
 } from "@phosphor-icons/react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { COPY, ROLES } from "@/lib/constants";
 import { useCurrentRole, useRoleGate, useSetRole } from "@/hooks/useAuth";
+import { useUiStore } from "@/stores/uiStore";
 import { cn } from "@/lib/utils";
 import type { Role } from "@/types";
 
@@ -32,13 +34,16 @@ const NAV: NavItem[] = [
   { to: "/exports", label: COPY.NAV.EXPORTS, icon: Hammer, required: "SENIOR" },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  drawerWidth?: number;
+}
+
+function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   const role = useCurrentRole();
   const setRole = useSetRole();
   const canAccess = useRoleGate;
-
   return (
-    <aside className="row-span-2 col-start-1 col-end-2 border-r border-[color:var(--border-soft)] bg-surface-raised flex flex-col">
+    <>
       <div className="px-5 pt-6 pb-4 flex items-center gap-3">
         <motion.img
           src="/lou-wordmark-on-light.png"
@@ -58,9 +63,10 @@ export function Sidebar() {
             <NavLink
               key={item.to}
               to={item.to}
+              onClick={onNavigate}
               className={({ isActive }) =>
                 cn(
-                  "group relative flex items-center gap-3 px-3 py-2 rounded-[10px] transition-colors duration-200",
+                  "group relative flex items-center gap-3 px-3 py-2 rounded-[10px] transition-colors duration-200 min-h-11",
                   isActive ? "bg-surface-sunken text-ink" : "text-[color:var(--color-ink-soft)] hover:bg-surface-sunken/60",
                 )
               }
@@ -101,7 +107,7 @@ export function Sidebar() {
               whileTap={{ scale: 0.96 }}
               onClick={() => setRole(option)}
               className={cn(
-                "relative font-mono text-xs uppercase tracking-wider py-1.5 rounded-[6px] transition-colors duration-200",
+                "relative font-mono text-xs uppercase tracking-wider py-2 rounded-[6px] transition-colors duration-200 min-h-11",
                 option === role ? "text-ink" : "text-[color:var(--color-warm-gray)] hover:text-ink",
               )}
             >
@@ -117,6 +123,41 @@ export function Sidebar() {
           ))}
         </div>
       </div>
-    </aside>
+    </>
+  );
+}
+
+export function Sidebar({ drawerWidth = 288 }: SidebarProps) {
+  const sidebarOpen = useUiStore((state) => state.sidebarOpen);
+  const setSidebarOpen = useUiStore((state) => state.setSidebarOpen);
+  const location = useLocation();
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname, setSidebarOpen]);
+
+  return (
+    <>
+      <aside className="hidden md:flex row-span-2 col-start-1 col-end-2 border-r border-[color:var(--border-soft)] bg-surface-raised flex-col">
+        <SidebarBody />
+      </aside>
+
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.aside
+            key="drawer"
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", stiffness: 280, damping: 26 }}
+            style={{ width: drawerWidth }}
+            className="md:hidden fixed inset-y-0 left-0 z-50 bg-surface-raised border-r border-[color:var(--border-soft)] flex flex-col"
+            aria-label="Mobile navigation"
+          >
+            <SidebarBody onNavigate={() => setSidebarOpen(false)} />
+          </motion.aside>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

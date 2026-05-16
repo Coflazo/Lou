@@ -6,117 +6,41 @@
 </p>
 
 <p align="center">
-  AI legal workspace for contract review, playbook negotiation, and voice-driven proposal capture.
+  Controlled legal memory for contracts, playbooks, voice notes, and approvals.
 </p>
 
-<p align="center">
-  Built for the <strong>{Tech: Europe} Paris AI Hackathon</strong>.
-</p>
+## What Lou Is
 
-## What Lou Does
+Lou is a legal workspace for contract teams. It maps contracts against approved negotiation playbooks, turns gaps into reviewable proposals, and commits senior-approved changes back into reusable legal memory.
 
-Lou helps legal teams turn contract review into controlled legal memory.
+The product has three surfaces:
 
-A junior reviewer can upload a contract, map clauses against the company playbook, see risk and uncertainty, and propose updates. A senior lawyer can approve, reject, edit, export, and publish those changes back into the playbook. Voice notes and meeting transcripts can also become proposed playbook updates, so negotiation knowledge does not disappear after the call.
+- **Web app** for contract review, playbooks, voice notes, senior approval, exports, and the Company Brain.
+- **FastAPI backend** for analysis, review artifacts, voice transcript processing, exports, API keys, and command routing.
+- **npm CLI** published as `@lou-ai/cli` so terminal users can inspect playbooks, review contracts, approve proposals, edit positions, and export data.
 
-The first version of this idea was only a proof of concept from an earlier event. It got early signal from Siemens Legal Operations and Legora. This repository is a from-zero rebuild for this hackathon: new backend, new frontend, new data layer, new algorithms, new design system, and a full demo workflow.
+## Core Workflow
 
-## Demo Walkthrough
+1. A legal user uploads or analyzes a contract.
+2. Lou maps clauses to a playbook position when the clause is covered.
+3. Lou marks uncovered clauses as unmapped and proposes new guidance.
+4. Senior counsel approves, rejects, edits, or commits proposals.
+5. Approved knowledge becomes part of the controlled playbook memory.
+6. The Company Brain shows the connected graph of playbooks, topics, commits, and legal memory.
 
-Use this path for a 2-minute judge demo:
-
-1. Log in as **Junior** and open one of the generated legal playbooks.
-2. Upload or analyze a contract.
-3. Show mapped clauses, unmapped clauses, risk badges, and the Bayesian risk posterior.
-4. Open voice mode, paste or record a legal discussion, and generate proposed playbook updates.
-5. Switch to **Senior**, review a proposal, approve it, and show the commit.
-6. Switch to **Admin** and show Company Brain: playbooks as the top-level legal memory, with each playbook opening into its own mini-brain.
-
-## Hackathon Partner Technologies
-
-Lou uses hackathon partner technologies in the core product path:
-
-| Partner | How Lou Uses It |
-| --- | --- |
-| **Pioneer by Fastino** | Generated the 50-record legal playbook dataset. Each record includes one preferred position, three fallbacks, one red line, and one deal breaker. Lou materializes those rows into 9 runtime playbooks across NDA, DPA/privacy, SaaS, AI vendor, security, IP licensing, procurement, services, and software. |
-| **SLNG** | Powers the intended live voice path for STT/TTS. When `LOU_SLNG_API_KEY` is not set, Lou still runs in transcript fallback mode so judges can test the workflow without external credentials. |
-| **OpenAI** | Optional command parsing and dense semantic search fusion. Lou falls back to deterministic local behavior when `LOU_OPENAI_API_KEY` is absent. |
-
-## Product Surface
-
-- **Playbooks**: structured negotiation positions, fallbacks, red lines, deal breakers, and edit flow.
-- **Contracts**: upload/analyze text, PDF, or DOCX contracts against the selected playbook.
-- **Findings**: mapped and unmapped clauses with location, recommendation, risk, and match score.
-- **Review**: senior approval queue for playbook updates.
-- **Voice**: live voice-session contract plus transcript fallback for meeting-derived proposals.
-- **Company Brain**: graph view of teams, vendors, policies, clauses, and their relationships.
-- **Exports**: JSON, XLSX, and graph-image placeholder routes for review artifacts.
-
-## Technical Architecture
-
-### Backend
-
-- Python 3.13
-- FastAPI
-- SQLModel-style data models for the demo state
-- Pydantic Settings for configuration
-- JSONL seed data in `demo-data/`
-- Eight FastAPI routers:
-  - `auth`
-  - `playbooks`
-  - `contracts`
-  - `voice`
-  - `review`
-  - `exports`
-  - `brain`
-  - `commands`
-
-The backend is centered around an `AlgorithmRegistry` that owns fitted playbook matchers, risk scorers, section detectors, voice matchers, and graph metrics.
-
-### Algorithms
-
-Lou uses local, inspectable algorithms so the demo is not just a wrapper around an LLM:
-
-| Module | Purpose |
-| --- | --- |
-| `clause_matching.py` | TF-IDF sparse vectors and cosine similarity to map contract clauses to playbook positions. |
-| `risk_scoring.py` | Dirichlet-Categorical Bayesian posterior with 95% credible intervals for contract-level risk. |
-| `section_detector.py` | HMM Viterbi decoding in log-space to segment legal text into sections. |
-| `voice_matching.py` | Jaro-Winkler, edit distance, and TF-IDF matching to connect transcripts to playbook topics. |
-| `semantic_search.py` | BM25 plus optional OpenAI embeddings, fused with reciprocal rank fusion. |
-| `company_brain.py` | Recursive `.mm`-style mind-map JSON for a readable Company Brain view. |
-
-### Frontend
-
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- Framer Motion
-- TanStack Query
-- Zustand
-- D3 Force
-- React Dropzone
-
-The UI has a custom design system in `frontend/src/design-system/`: OKLCH color tokens, Instrument Serif display type, DM Mono data labels, geometric spacing, and motion presets.
-
-## Run Locally
-
-### Terminal Launch
+## Quick Start
 
 ```bash
 ./scripts/launch_lou.sh
 ```
 
-The launcher checks local tools, installs Python and Node dependencies, runs backend tests, runs frontend tests, builds the production frontend, starts the backend, runs live smoke checks, and serves the Vite preview build.
-
-Open:
+Open the web app:
 
 ```text
 http://localhost:5173
 ```
 
-Backend:
+Backend API:
 
 ```text
 http://localhost:8000
@@ -128,170 +52,237 @@ If a port is already in use:
 BACKEND_PORT=8010 FRONTEND_PORT=5180 ./scripts/launch_lou.sh
 ```
 
-### Manual Development
-
-Backend:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r backend/requirements.txt
-PYTHONPATH=backend uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-```
-
-Frontend:
-
-```bash
-cd frontend
-npm install
-npm run dev -- --host 127.0.0.1 --port 5173
-```
+`launch_lou.sh` prepares Python and frontend dependencies, materializes the 50-playbook runtime data, runs tests/builds, starts the backend, runs smoke checks, and serves the built frontend preview.
 
 ## Demo Roles
 
-- **JUNIOR**: read playbooks, analyze contracts, use listening mode, and submit proposed updates.
-- **SENIOR**: Junior permissions plus review approvals, playbook edits, commits, and exports.
-- **ADMIN**: Senior permissions plus Company Brain and admin import access.
+Role switching is available in the sidebar for local demo use.
 
-Role switching is available in the app sidebar. Each switch updates the demo session on the backend.
+- **Junior counsel** reviews contracts, sees mapped and unmapped clauses, records voice notes, and submits proposals.
+- **Senior counsel** reviews proposals, approves or rejects them, edits playbook positions, commits changes, and exports artifacts.
+- **Legal operations** opens the Company Brain and manages higher-level controls such as imports and API keys.
 
-## Product API Keys
+## Playbooks And Upload Contracts
 
-The sidebar role switch is only a local demo shortcut. Real API clients should authenticate with Lou API keys:
+Runtime playbooks live in:
+
+```text
+demo-data/playbooks.jsonl
+demo-data/playbook_positions.jsonl
+```
+
+The app now labels playbooks with explicit codes:
+
+```text
+PB01 - NDA Negotiation and Enforcement Playbook
+PB02 - SaaS Contract Lifecycle Management Playbook
+PB03 - Data Processing Agreement (DPA) Framework Playbook
+...
+PB50 - Public Sector Contract Compliance Audit Playbook
+```
+
+Upload-ready contract PDFs are paired by the same code:
+
+```text
+demo-data/generated-contract-pdfs-50x50/
+```
+
+Examples:
+
+```text
+PB01 - NDA Negotiation and Enforcement Playbook - Contract 01 Demo Agreement.pdf
+PB02 - SaaS Contract Lifecycle Management Playbook - Contract 01 Demo Agreement.pdf
+PB03 - Data Processing Agreement DPA Framework Playbook - Contract 01 Demo Agreement.pdf
+```
+
+Use `PB01` contracts with the `PB01` playbook, `PB02` contracts with the `PB02` playbook, and so on. The folder also has `manifest.json` with the `playbook_id`, `playbook_code`, `playbook_name`, and PDF path for each contract.
+
+There is also a smaller full-text sample set:
+
+```text
+demo-data/generated-contract-pdfs/
+```
+
+Those files are also named with their related playbook code and playbook name where there is a direct match, for example `PB01 - NDA Negotiation and Enforcement Playbook - Mutual Non-Disclosure Agreement.pdf`.
+
+## Browser Usage
+
+Important web flows:
+
+- **Dashboard** shows active playbooks, positions, contracts, review count, voice entry point, and commit history.
+- **Playbooks** lists all playbooks and opens position-level guidance, fallback ladders, red lines, and deal breakers.
+- **Contracts** accepts text-based PDF/DOCX uploads, maps clauses, shows risk, highlights findings, and routes gaps into proposals.
+- **Review queue** lets senior counsel approve, reject, edit, and commit proposed playbook updates.
+- **Voice session** processes typed transcript notes or uploaded audio into review-ready suggestions.
+- **Company Brain** renders the legal memory graph across playbooks, topics, entities, commits, and relationships.
+- **Exports** produces JSON, XLSX, and PNG snapshots.
+
+The shell, split panes, contract lists, navigation, and top command bar have responsive behavior for mobile, tablet, and desktop layouts.
+
+**Mobile contract negotiations.** On screens narrower than 768px the Voice
+session page exposes a `Fullscreen` button. Tap it for an edge-to-edge listening
+view: a top bar with live status, the voice orb up top, the scrollable
+transcript taking the middle, and a sticky bottom row with language picker,
+listen/stop, and Send-to-playbook actions. Tap the collapse icon (or press Esc)
+to return to the normal page.
+
+## npm CLI
+
+Install the CLI:
+
+```bash
+npm install -g @lou-ai/cli
+```
+
+Configure it:
+
+```bash
+lou configure --api-base http://localhost:8000 --api-key lou_xxxxx
+```
+
+Useful commands:
+
+```bash
+lou status
+lou login --role senior
+lou playbooks
+lou playbooks show pb-01-nda-negotiation-and-enforcement-playbook
+lou playbooks import
+lou contracts list
+lou contracts show contract-id
+lou review
+lou review approve prop-id
+lou review reject prop-id
+lou review submit --playbook pb-01-nda-negotiation-and-enforcement-playbook --topic "Scope" --text "Updated stance"
+lou commit prop-id
+lou push prop-id
+lou edit pb-01-nda-negotiation-and-enforcement-playbook --position position-id --set "Preferred Position=Updated text"
+lou review-contract "demo-data/generated-contract-pdfs-50x50/PB01 - NDA Negotiation and Enforcement Playbook - Contract 01 Demo Agreement.pdf" --playbook pb-01-nda-negotiation-and-enforcement-playbook
+lou voice transcript --playbook pb-01-nda-negotiation-and-enforcement-playbook --language en --text "...notes..."
+lou voice transcribe ./recording.webm --playbook pb-01-nda-negotiation-and-enforcement-playbook
+lou brain
+lou keys list
+lou keys create --name ci-bot --role SENIOR
+lou keys revoke key-id
+lou keys use lou_xxxxx
+lou export json
+lou export xlsx
+lou export png
+lou command "export the playbook"
+```
+
+Global flags work on every command:
+
+```bash
+lou --json playbooks            # JSON output for scripts/integrations
+lou --verbose status            # print HTTP method + URL of each request to stderr
+lou --timeout 120000 review-contract ./big.pdf --playbook pb-saas
+```
+
+The legacy Python CLI at `cli/lou.py` is kept as a compatibility shim and shows a
+deprecation banner when invoked interactively. New work should use `@lou-ai/cli`.
+
+Provider keys can be stored locally for self-hosted backends:
+
+```bash
+lou configure --openai-key sk-... --slng-key slng_...
+```
+
+Provider keys are forwarded only to localhost by default. To forward them to a remote Lou backend, opt in explicitly:
+
+```bash
+lou configure --allow-provider-key-forwarding
+```
+
+The CLI writes `~/.lou/config.json` with owner-only permissions.
+
+The old Python CLI at `cli/lou.py` is kept as a deprecated legacy shim for existing scripts. New terminal work should use `@lou-ai/cli`.
+
+## Product API
+
+Lou supports bearer-token API keys:
 
 ```http
 Authorization: Bearer lou_xxxxx
 ```
 
-An admin creates keys for each person or integration. The raw key is shown once, and Lou stores only a hash plus a short prefix. For local demo setup, switch to Admin in the UI or run the demo-login call first:
+Important API groups:
 
-```bash
-curl -X POST http://localhost:8000/api/session/demo-login \
-  -H "Content-Type: application/json" \
-  -d '{"role":"ADMIN"}'
-```
+- `GET /api/health`
+- `POST /api/session/demo-login`
+- `GET /api/playbooks`
+- `GET /api/playbooks/{playbook_id}`
+- `PATCH /api/playbooks/{playbook_id}/positions/{position_id}`
+- `POST /api/contracts/upload`
+- `POST /api/contracts/analyze`
+- `POST /api/contracts/review-artifact`
+- `GET /api/review`
+- `POST /api/review/proposals`
+- `POST /api/review/{proposal_id}/approve`
+- `POST /api/review/{proposal_id}/reject`
+- `POST /api/voice/transcript`
+- `POST /api/voice/transcribe-audio`
+- `GET /api/company-brain`
+- `GET /api/export/{json|xlsx|png}`
+- `POST /api/lou-command`
 
-Create a senior API key:
+API keys are managed through `/api/api-keys`. Demo role switching is for local development; production integrations should use API keys.
 
-```bash
-curl -X POST http://localhost:8000/api/api-keys \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Harvey integration","role":"SENIOR"}'
-```
+## Hardening And Configuration
 
-Use the returned key from a terminal or another product:
+Backend defaults live in `backend/app/config.py` and can be overridden with `LOU_*` environment variables.
 
-```bash
-curl http://localhost:8000/api/review \
-  -H "Authorization: Bearer lou_xxxxx"
-```
+Notable hardening in this branch:
 
-List active keys:
+- Upload size caps and media-type checks before contract parsing.
+- PDF page caps and DOCX archive compression-ratio checks.
+- Request IDs on responses and structured JSON logging.
+- In-memory token-bucket rate limiting for single-instance demos.
+- Consistent error envelopes: `{"error": {"code", "message", "details"}}`.
+- Request-scoped provider key forwarding through `X-Lou-OpenAI-Key` and `X-Lou-SLNG-Key` without persistence.
+- Algorithm tuning moved to `backend/app/algorithms.yaml`, overrideable with `LOU_ALGORITHM_CONFIG_PATH`.
 
-```bash
-curl http://localhost:8000/api/api-keys
-```
+Local secrets can be placed in `api-keys.txt`; the file is gitignored and should stay untracked.
 
-Revoke a key:
+## Algorithms
 
-```bash
-curl -X DELETE http://localhost:8000/api/api-keys/key_id_here
-```
+- **Clause matching** maps contract language to playbook positions.
+- **Section detection** segments contracts before clause-level analysis.
+- **Bayesian risk scoring** turns findings into contract-level risk posture.
+- **Voice matching** converts negotiation notes into proposed playbook updates.
+- **Company Brain** links playbooks, positions, commits, topics, entities, and relationships.
+- **Semantic search and command parsing** can use OpenAI when configured, with deterministic fallbacks when not configured.
 
-## Configuration
-
-All tunable constants live in `backend/app/config.py` as a `pydantic-settings` model. Override values through `.env` or `LOU_*` environment variables.
-
-| Variable | Default | Meaning |
-| --- | --- | --- |
-| `LOU_SEED_DEMO_DATA` | `true` | Seed the in-memory store from `demo-data/*.jsonl`. |
-| `LOU_CLAUSE_MATCH_MIN_SCORE` | `0.22` | TF-IDF cosine threshold for mapped findings. |
-| `LOU_VOICE_MATCH_THRESHOLD` | `0.55` | Voice-to-playbook matching threshold. |
-| `LOU_RISK_PRIOR_ALPHA` | `2.0,2.0,2.0` | Dirichlet prior for Low, Medium, High risk. |
-| `LOU_OPENAI_API_KEY` | unset | Enables OpenAI command parsing and dense semantic search. |
-| `LOU_SLNG_API_KEY` | unset | Enables live SLNG voice integrations. |
-
-## API Overview
-
-| Area | Routes |
-| --- | --- |
-| Health | `GET /api/health` |
-| Session | `POST /api/session/demo-login` |
-| API Keys | `POST /api/api-keys`, `GET /api/api-keys`, `DELETE /api/api-keys/{id}` |
-| Playbooks | `GET /api/playbooks`, `GET /api/playbooks/{id}`, `PATCH /api/playbooks/{id}/positions/{position_id}` |
-| Contracts | `GET /api/contracts`, `POST /api/contracts/analyze`, `POST /api/contracts/upload`, `GET /api/contracts/{id}` |
-| Voice | `POST /api/voice/session`, `POST /api/voice/transcript` |
-| Review | `GET /api/review`, `POST /api/review/proposals`, `POST /api/review/{id}/approve`, `POST /api/review/{id}/reject` |
-| Company Brain | `GET /api/company-brain`, `GET /api/playbooks/{id}/brain` |
-| Export | `GET /api/export/json`, `GET /api/export/xlsx`, `GET /api/export/png` |
-| Commands | `POST /api/lou-command` |
-
-## Demo Data
-
-All runtime seed data lives in `demo-data/*.jsonl`, one JSON object per line:
-
-- `playbooks.jsonl`
-- `playbook_positions.jsonl`
-- `contracts.jsonl`
-- `proposals.jsonl`
-- `commits.jsonl`
-- `entities.jsonl`
-- `relations.jsonl`
-
-`demo-data/lou-pioneer-playbook-datasets-50.jsonl` is the Pioneer source dataset. `scripts/materialize_runtime_playbooks.py` converts it into the runtime `playbooks.jsonl` and `playbook_positions.jsonl` files used by the app. The workbook files are kept as review artifacts and are not required at runtime.
-
-### Generate 50 Pioneer Playbooks
-
-To generate a larger Pioneer matrix with 50 distinct playbooks and 50 rows per playbook, add your Pioneer key to `api-keys.txt`:
-
-```bash
-PIONEER_API_KEY=your_key_here
-```
-
-Then run:
-
-```bash
-python3 scripts/generate_lou_playbook_matrix.py --playbooks 50 --rows-per-playbook 50 --batch-size 5
-```
-
-This makes 2,500 total playbook rows. Playbook specifications are requested in smaller batches by default to avoid oversized Pioneer responses. If Pioneer still returns malformed JSON, rerun with a smaller spec batch:
-
-```bash
-python3 scripts/generate_lou_playbook_matrix.py --playbooks 50 --rows-per-playbook 50 --batch-size 5 --spec-batch-size 5
-```
-
-The generator writes:
-
-- `demo-data/lou-pioneer-playbook-matrix-50x50.jsonl`
-- `demo-data/lou-pioneer-playbook-matrix-50x50.xlsx`
-- `demo-data/pioneer-playbook-matrix-request.json`
-- `demo-data/pioneer-playbook-matrix-response.json`
-- `demo-data/siemens-mutual-nda-playbook.xlsx`
-
-For a faster validation run, keep 50 playbooks but lower the row count:
-
-```bash
-python3 scripts/generate_lou_playbook_matrix.py --playbooks 50 --rows-per-playbook 10 --batch-size 5
-```
-
-## Tests
+## Verification
 
 Backend:
 
 ```bash
-source .venv/bin/activate
-python -m pytest backend/tests/
+PYTHONPATH=backend .venv/bin/python -m pytest backend/tests -q
+```
+
+Legacy Python CLI tests:
+
+```bash
+.venv/bin/python -m pytest tests -q
 ```
 
 Frontend:
 
 ```bash
-cd frontend
-npm test
-npm run build
+npm --prefix frontend test -- --run
+npm --prefix frontend run build
 ```
 
-Live smoke checks:
+npm CLI:
+
+```bash
+npm --prefix packages/lou-cli test
+npm --prefix packages/lou-cli run build
+npm --prefix packages/lou-cli run pack:dry
+```
+
+Live smoke checks, with the backend running:
 
 ```bash
 python scripts/smoke_lou.py http://localhost:8000
@@ -303,13 +294,9 @@ python scripts/smoke_lou.py http://localhost:8000
 backend/app/              FastAPI app, routers, services, models, algorithms
 backend/tests/            Backend flow and algorithm tests
 frontend/src/             React app, design system, pages, components, hooks
-demo-data/                Pioneer-generated and runtime JSONL seed data
-scripts/                  Launch, smoke test, and dataset generation scripts
-cli/                      Small local CLI entrypoint
+packages/lou-cli/         npm-installable Lou CLI package
+cli/                      Deprecated Python CLI shim
+demo-data/                Runtime JSONL data, generated playbooks, generated contract PDFs
+scripts/                  Launch, smoke test, data materialization, and demo PDF generators
+tests/                    Legacy Python CLI tests
 ```
-
-## Submission Notes
-
-- This project was built newly for the hackathon. An earlier event version existed only as a proof of concept; this repo is the rebuilt product.
-- The repository is structured for jury review: setup instructions, partner technology usage, API overview, test commands, and architecture notes are included here.
-- The app runs without paid API keys by using deterministic fallbacks and transcript mode. Adding `LOU_OPENAI_API_KEY` or `LOU_SLNG_API_KEY` unlocks the external integrations.

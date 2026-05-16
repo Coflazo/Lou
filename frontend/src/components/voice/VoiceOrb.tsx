@@ -19,7 +19,11 @@ export function VoiceOrb({ amplitude, active, className }: VoiceOrbProps) {
   }, [amplitude, active, target]);
 
   return (
-    <div className={cn("relative flex items-center justify-center", className)}>
+    <div
+      role="img"
+      aria-label={active ? "Voice orb listening" : "Voice orb idle"}
+      className={cn("relative flex items-center justify-center", className)}
+    >
       <motion.div
         style={{ scale: ringScale, opacity: glow }}
         className="absolute h-56 w-56 rounded-full bg-[color:var(--color-amber-soft)] blur-2xl"

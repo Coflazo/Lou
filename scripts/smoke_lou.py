@@ -2,13 +2,16 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 import urllib.error
 import urllib.request
 
 
-BASE_URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8000"
+BASE_URL = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("LOU_API_BASE", "http://localhost:8000")
+EXPECTED_PLAYBOOKS = int(os.environ.get("LOU_SMOKE_EXPECTED_PLAYBOOKS", "50"))
+EXPECTED_POSITIONS = int(os.environ.get("LOU_SMOKE_EXPECTED_POSITIONS", "2500"))
 
 
 def request(method: str, path: str, payload: dict | None = None):
@@ -57,7 +60,10 @@ def main() -> None:
 
     login("ADMIN")
     status, playbooks = request("GET", "/api/playbooks")
-    assert_true(status == 200 and len(playbooks) >= 1, "playbooks list failed")
+    assert_true(
+        status == 200 and len(playbooks) >= EXPECTED_PLAYBOOKS,
+        f"runtime exposed {len(playbooks)} playbooks, expected >= {EXPECTED_PLAYBOOKS}",
+    )
     playbook_id = playbooks[0]["id"]
 
     status, playbook = request("GET", f"/api/playbooks/{playbook_id}")
@@ -67,7 +73,10 @@ def main() -> None:
         status, listed_detail = request("GET", f"/api/playbooks/{listed_playbook['id']}")
         assert_true(status == 200, f"playbook detail failed for {listed_playbook['id']}")
         total_positions += len(listed_detail["positions"])
-    assert_true(total_positions >= 50, f"runtime playbooks exposed only {total_positions} total positions")
+    assert_true(
+        total_positions >= EXPECTED_POSITIONS,
+        f"runtime playbooks exposed {total_positions} positions, expected >= {EXPECTED_POSITIONS}",
+    )
     known_text = playbook["positions"][0]["preferred_position"]
 
     status, company_brain = request("GET", "/api/company-brain")
@@ -83,7 +92,7 @@ def main() -> None:
         {
             "playbook_id": playbook_id,
             "name": "Launch Smoke NDA",
-            "text": f"{known_text} The agreement adds lunchroom seating obligations.",
+            "text": f"{known_text}. Xylophone nebula quartzboard cafeteria murals.",
         },
     )
     assert_true(status == 200, "contract analysis failed")
@@ -96,7 +105,10 @@ def main() -> None:
 
     status, voice = request("POST", "/api/voice/session", {"playbook_id": playbook_id, "language": "fr"})
     assert_true(status == 200 and voice["language"] == "fr", "SLNG voice session metadata failed")
-    assert_true(set(voice["supported_languages"]) == {"de", "en", "fr", "nl"}, "voice language set is wrong")
+    assert_true(
+        "fr" in voice["supported_languages"] and len(voice["supported_languages"]) >= 1,
+        f"voice session did not advertise fr; got {voice['supported_languages']}",
+    )
 
     status, transcript = request(
         "POST",

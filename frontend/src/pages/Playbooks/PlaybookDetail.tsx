@@ -51,6 +51,7 @@ export function PlaybookDetailPage() {
       <SplitPane
         leftWidth="minmax(280px, 360px)"
         rightWidth="minmax(0, 1fr)"
+        collapseAt="md"
         left={
           <div className="flex flex-col gap-1 max-h-[70vh] overflow-y-auto pr-1">
             {playbook.positions.map((position) => (

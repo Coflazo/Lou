@@ -1,9 +1,12 @@
 import asyncio
+import json
+import zipfile
 
 from fastapi.testclient import TestClient
 from io import BytesIO
 from pathlib import Path
 
+import fitz
 import pytest
 from docx import Document
 from pypdf import PdfWriter
@@ -14,6 +17,7 @@ from sqlmodel import Session
 from app import demo_data, services
 from app.db import ApiKeyRecord, engine
 from app.main import app
+from app.rate_limit import rate_limiter
 
 
 client = TestClient(app)
@@ -22,6 +26,7 @@ client = TestClient(app)
 @pytest.fixture(autouse=True)
 def reset_store():
     services.store.reset()
+    rate_limiter.reset()
     with Session(engine) as session:
         session.exec(delete(ApiKeyRecord))
         session.commit()
@@ -73,15 +78,14 @@ def test_imports_all_demo_playbooks_and_positions():
     response = client.get("/api/playbooks")
     assert response.status_code == 200
     playbooks = response.json()
-    assert len(playbooks) >= 5
-    nda = next(item for item in playbooks if item["slug"] == "mutual-nda")
-    detail = client.get(f"/api/playbooks/{nda['id']}").json()
+    assert len(playbooks) == 50
+    detail = client.get(f"/api/playbooks/{playbooks[0]['id']}").json()
     total_positions = sum(
         len(client.get(f"/api/playbooks/{playbook['id']}").json()["positions"])
         for playbook in playbooks
     )
-    assert total_positions == 50
-    assert len(detail["positions"]) >= 1
+    assert total_positions == 2500
+    assert len(detail["positions"]) == 50
     assert detail["columns"] == ["Topic", "Preferred Position", "Fallback 1", "Fallback 2", "Fallback 3", "Red Line", "Deal Breaker"]
     assert detail["positions"][0]["columns"]["Preferred Position"]
 
@@ -123,7 +127,7 @@ def test_contract_analysis_maps_known_and_unknown_clauses():
         json={
             "playbook_id": playbook["id"],
             "name": "Supplier NDA",
-            "text": f"{known} The agreement adds lunchroom seating obligations.",
+            "text": f"{known}. Xylophone nebula quartzboard cafeteria murals.",
         },
     )
     assert response.status_code == 200
@@ -141,11 +145,11 @@ def test_contract_upload_extracts_text_and_returns_review_payload():
     detail = client.get(f"/api/playbooks/{playbook['id']}").json()
     known = detail["positions"][0]["preferred_position"]
     cases = [
-        ("supplier-nda.pdf", "application/pdf", make_pdf_bytes(f"{known} The agreement adds lunchroom seating obligations.")),
+        ("supplier-nda.pdf", "application/pdf", make_pdf_bytes(f"{known}. Xylophone nebula quartzboard cafeteria murals.")),
         (
             "supplier-nda.docx",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            make_docx_bytes(f"{known} The agreement adds lunchroom seating obligations."),
+            make_docx_bytes(f"{known}. Xylophone nebula quartzboard cafeteria murals."),
         ),
     ]
     for filename, content_type, payload in cases:
@@ -157,11 +161,125 @@ def test_contract_upload_extracts_text_and_returns_review_payload():
         assert response.status_code == 200
         body = response.json()
         assert body["contract"]["name"] == filename
-        assert "lunchroom seating" in body["contract"]["text"].lower()
+        assert "quartzboard" in body["contract"]["text"].lower()
         assert body["sections"]
         assert body["highlights"]
         assert any(finding["status"] == "mapped" for finding in body["findings"])
         assert any(finding["status"] == "unmapped" for finding in body["findings"])
+
+
+def test_contract_review_artifact_returns_zip_with_annotated_pdf_and_review_json():
+    login("JUNIOR")
+    playbook = client.get("/api/playbooks").json()[0]
+    detail = client.get(f"/api/playbooks/{playbook['id']}").json()
+    known = detail["positions"][0]["preferred_position"]
+
+    response = client.post(
+        "/api/contracts/review-artifact",
+        data={"playbook_id": playbook["id"]},
+        files={
+            "file": (
+                "supplier-nda.pdf",
+                make_pdf_bytes(f"{known}. The agreement adds lunchroom seating obligations."),
+                "application/pdf",
+            )
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("application/zip")
+    archive = zipfile.ZipFile(BytesIO(response.content))
+    assert sorted(archive.namelist()) == ["annotated-supplier-nda.pdf", "review.json"]
+    review = json.loads(archive.read("review.json"))
+    assert review["contract"]["name"] == "supplier-nda.pdf"
+    assert review["findings"]
+    assert review["risk_posterior"]
+    assert isinstance(review["warnings"], list)
+    annotated_pdf = fitz.open(stream=archive.read("annotated-supplier-nda.pdf"), filetype="pdf")
+    assert any(page.first_annot for page in annotated_pdf)
+
+
+def test_contract_review_artifact_returns_docx_and_warnings_for_unmatched_excerpts(monkeypatch):
+    login("JUNIOR")
+    playbook = client.get("/api/playbooks").json()[0]
+    original = services.analyze_uploaded_contract
+
+    def fake_analyze_uploaded_contract(playbook_id, filename, content):
+        result = original(playbook_id, filename, content)
+        result["findings"][0].excerpt = "Text that is not present in the original document"
+        return result
+
+    monkeypatch.setattr(services, "analyze_uploaded_contract", fake_analyze_uploaded_contract)
+
+    response = client.post(
+        "/api/contracts/review-artifact",
+        data={"playbook_id": playbook["id"]},
+        files={
+            "file": (
+                "supplier-nda.docx",
+                make_docx_bytes("The agreement adds lunchroom seating obligations."),
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
+        },
+    )
+
+    assert response.status_code == 200
+    archive = zipfile.ZipFile(BytesIO(response.content))
+    assert sorted(archive.namelist()) == ["annotated-supplier-nda.docx", "review.json"]
+    review = json.loads(archive.read("review.json"))
+    assert review["warnings"]
+    assert "not present" in review["warnings"][0].lower()
+
+
+def test_contract_review_artifact_rejects_scanned_or_empty_pdfs():
+    login("JUNIOR")
+    playbook = client.get("/api/playbooks").json()[0]
+    writer = PdfWriter()
+    writer.add_blank_page(width=612, height=792)
+    output = BytesIO()
+    writer.write(output)
+
+    response = client.post(
+        "/api/contracts/review-artifact",
+        data={"playbook_id": playbook["id"]},
+        files={"file": ("scanned.pdf", output.getvalue(), "application/pdf")},
+    )
+
+    assert response.status_code == 422
+    assert "no extractable text" in response.json()["error"]["message"].lower()
+
+
+def test_request_scoped_provider_keys_override_settings_for_one_request(monkeypatch):
+    seen = []
+    playbook = client.get("/api/playbooks").json()[0]
+    monkeypatch.setattr(services.settings, "SLNG_API_KEY", "env-slng")
+
+    def fake_post(url, *, headers, files, data, timeout):
+        seen.append(headers["Authorization"])
+
+        class FakeResponse:
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                return {"transcript": "Speaker 1: Review residual knowledge."}
+
+        return FakeResponse()
+
+    monkeypatch.setattr(services.httpx, "post", fake_post)
+
+    response = client.post(
+        "/api/voice/transcribe-audio",
+        data={"playbook_id": playbook["id"], "language": "en"},
+        files={"file": ("voice.webm", b"fake webm audio", "audio/webm")},
+        headers={"X-Lou-SLNG-Key": "request-slng"},
+    )
+
+    assert response.status_code == 200
+    assert seen == ["Bearer request-slng"]
+
+    services.transcribe_audio_with_slng(b"fake webm audio", "voice.webm", "audio/webm")
+    assert seen[-1] == "Bearer env-slng"
 
 
 def test_voice_transcript_creates_proposed_updates():
@@ -411,3 +529,76 @@ def test_expanded_dataset_and_pioneer_request_exist():
     assert not old_request.exists()
     assert len(dataset.read_text().splitlines()) == 50
     assert '"provider": "pioneer"' in pioneer_request.read_text()
+
+
+def test_upload_rejects_unknown_magic_bytes_with_415():
+    login("ADMIN")
+    playbook = client.get("/api/playbooks").json()[0]
+    response = client.post(
+        "/api/contracts/upload",
+        data={"playbook_id": playbook["id"]},
+        files={"file": ("evil.txt", b"This is just text, not a contract.", "text/plain")},
+    )
+    assert response.status_code == 415
+    assert response.json()["error"]["code"] == "UNSUPPORTED_MEDIA"
+
+
+def test_upload_rejects_payload_above_size_cap():
+    from app import limits
+
+    login("ADMIN")
+    playbook = client.get("/api/playbooks").json()[0]
+    fake_pdf = b"%PDF-" + b"\x00" * (limits.MAX_UPLOAD_BYTES + 16)
+    response = client.post(
+        "/api/contracts/upload",
+        data={"playbook_id": playbook["id"]},
+        files={"file": ("huge.pdf", fake_pdf, "application/pdf")},
+    )
+    assert response.status_code == 413
+    assert response.json()["error"]["code"] == "UPLOAD_TOO_LARGE"
+
+
+def test_rate_limit_returns_429_with_retry_after(monkeypatch):
+    from app import rate_limit
+
+    rate_limiter.reset()
+    monkeypatch.setattr(rate_limit.rate_limiter, "per_minute", 2)
+    monkeypatch.setattr(rate_limit.rate_limiter, "refill_per_second", 0.0001)
+    rate_limit.rate_limiter._buckets.clear()
+
+    assert client.get("/api/health").status_code == 200
+    assert client.get("/api/health").status_code == 200
+    limited = client.get("/api/health")
+    assert limited.status_code == 429
+    assert "Retry-After" in limited.headers
+    assert limited.json()["error"]["code"] == "RATE_LIMITED"
+
+
+def test_error_responses_use_envelope():
+    login("ADMIN")
+    response = client.post(
+        "/api/contracts/analyze",
+        json={"playbook_id": "pb-does-not-exist", "name": "x", "text": "y"},
+    )
+    assert response.status_code == 404
+    body = response.json()
+    assert body["error"]["code"] == "NOT_FOUND"
+    assert body["error"]["message"]
+
+
+def test_request_id_is_propagated_in_response_header():
+    response = client.get("/api/health", headers={"X-Request-ID": "test-abc-123"})
+    assert response.headers["X-Request-ID"] == "test-abc-123"
+
+
+def test_algorithm_config_loads_yaml_with_defaults():
+    from app.algorithm_config import algorithm_config, load_algorithm_config
+    from app import config as cfg
+
+    reloaded = load_algorithm_config()
+    assert reloaded.clause_matching.min_score == algorithm_config.clause_matching.min_score
+    assert tuple(reloaded.hmm_section_detector.logistic.w_begin) == (-0.2, 3.8, 1.6, 0.4, -0.8, 0.7, 2.1)
+    assert reloaded.semantic_search.bm25.k1 == 1.5
+    assert str(reloaded.source_path).endswith("algorithms.yaml")
+    # source path comes from settings
+    assert Path(cfg.settings.ALGORITHM_CONFIG_PATH).exists()

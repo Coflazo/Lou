@@ -43,7 +43,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       transition={{ type: "spring", stiffness: 360, damping: 22 }}
       disabled={disabled || loading}
       className={cn(
-        "inline-flex items-center justify-center gap-2 font-medium tracking-tight transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-amber)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--surface-base)]",
+        "inline-flex items-center justify-center gap-2 font-medium tracking-tight transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:saturate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-amber)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--surface-base)]",
         VARIANT_STYLES[variant],
         SIZE_STYLES[size],
         className,

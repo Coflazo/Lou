@@ -6,19 +6,25 @@ import json
 import re
 import secrets
 import uuid
+import zipfile
 from contextvars import ContextVar, Token
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from pathlib import Path
 from threading import Lock
 from typing import Any
 
+import fitz
 import httpx
 from docx import Document
+from docx.enum.text import WD_COLOR_INDEX
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
 from openpyxl import Workbook
 from pypdf import PdfReader
 
 from .ai import draft_contract_from_notes, parse_command_with_openai
+from .algorithm_config import algorithm_config
 from .algorithms import (
     BayesianRiskScorer,
     ClauseMatcher,
@@ -28,6 +34,7 @@ from .algorithms import (
 )
 from .algorithms.risk_scoring import RiskObservation
 from .config import settings
+from .provider_keys import current_slng_key
 from sqlmodel import Session, select
 
 from .db import ApiKeyRecord, engine, init_db, write_snapshot
@@ -46,12 +53,30 @@ from .seeder import seed_all
 
 
 ROLE_RANK = {Role.JUNIOR: 1, Role.SENIOR: 2, Role.ADMIN: 3}
-SLNG_STT_MODEL = "deepgram/nova:3"
-SLNG_TTS_MODEL = "slng/rime/arcana:3-en"
-SLNG_STT_PATH = f"/v1/stt/{SLNG_STT_MODEL}"
-SLNG_TTS_PATH = f"/v1/bridges/unmute/tts/{SLNG_TTS_MODEL}"
-SLNG_STT_HTTP_URL = f"https://api.slng.ai{SLNG_STT_PATH}"
-SLNG_TTS_HTTP_URL = f"https://api.slng.ai{SLNG_TTS_PATH}"
+
+
+def _slng_stt_path() -> str:
+    return f"/v1/stt/{settings.SLNG_STT_MODEL}"
+
+
+def _slng_tts_path() -> str:
+    return f"/v1/bridges/unmute/tts/{settings.SLNG_TTS_MODEL}"
+
+
+def _slng_stt_http_url() -> str:
+    return f"{settings.SLNG_API_BASE_HTTP}{_slng_stt_path()}"
+
+
+def _slng_tts_http_url() -> str:
+    return f"{settings.SLNG_API_BASE_HTTP}{_slng_tts_path()}"
+
+
+def _slng_stt_ws_url() -> str:
+    return f"{settings.SLNG_API_BASE_WS}{_slng_stt_path()}"
+
+
+def _slng_tts_ws_url() -> str:
+    return f"{settings.SLNG_API_BASE_WS}{_slng_tts_path()}"
 
 
 @dataclass
@@ -82,13 +107,13 @@ class AlgorithmRegistry:
         self._lock = Lock()
         self._matchers: dict[str, ClauseMatcher] = {}
         self._brain = CompanyBrainMindMap()
-        self._brain.cache_ttl_seconds = float(settings.BRAIN_CACHE_TTL_SECONDS)
+        self._brain.cache_ttl_seconds = float(algorithm_config.brain.cache_ttl_seconds)
 
     def get_matcher(self, playbook: Playbook) -> ClauseMatcher:
         with self._lock:
             matcher = self._matchers.get(playbook.id)
             if matcher is None:
-                matcher = ClauseMatcher(min_score=settings.CLAUSE_MATCH_MIN_SCORE)
+                matcher = ClauseMatcher(min_score=algorithm_config.clause_matching.min_score)
                 matcher.fit(playbook.positions)
                 self._matchers[playbook.id] = matcher
             return matcher
@@ -102,26 +127,33 @@ class AlgorithmRegistry:
         self._brain.invalidate()
 
     def voice_matcher(self, playbook: Playbook) -> VoiceMatcher:
+        vm = algorithm_config.voice_matching
         return VoiceMatcher(
             clause_matcher=self.get_matcher(playbook),
-            threshold=settings.VOICE_MATCH_THRESHOLD,
-            jaro_weight=settings.VOICE_MATCH_JARO_WEIGHT,
-            tfidf_weight=settings.VOICE_MATCH_TFIDF_WEIGHT,
-            edit_weight=settings.VOICE_MATCH_EDIT_WEIGHT,
+            threshold=vm.threshold,
+            jaro_weight=vm.jaro_weight,
+            tfidf_weight=vm.tfidf_weight,
+            edit_weight=vm.edit_weight,
         )
 
     def risk_scorer(self) -> BayesianRiskScorer:
+        rs = algorithm_config.risk_scoring
         return BayesianRiskScorer(
-            levels=settings.RISK_LEVELS,
-            prior_alpha=settings.RISK_PRIOR_ALPHA,
+            levels=list(rs.levels),
+            prior_alpha=list(rs.prior_alpha),
         )
 
     def section_detector(self) -> HMMSectionDetector:
+        hmm = algorithm_config.hmm_section_detector
         return HMMSectionDetector(
-            init_inside=settings.HMM_INIT_INSIDE,
-            init_begin=settings.HMM_INIT_BEGIN,
-            transition_inside_to_inside=settings.HMM_TRANSITION_INSIDE_TO_INSIDE,
-            transition_begin_to_begin=settings.HMM_TRANSITION_BEGIN_TO_BEGIN,
+            init_inside=hmm.init_inside,
+            init_begin=hmm.init_begin,
+            transition_inside_to_inside=hmm.transition_inside_to_inside,
+            transition_begin_to_begin=hmm.transition_begin_to_begin,
+            w_begin=hmm.logistic.w_begin,
+            b_begin=hmm.logistic.b_begin,
+            b_inside=hmm.logistic.b_inside,
+            first_paragraph_bias=hmm.logistic.first_paragraph_bias,
         )
 
     def brain(self) -> CompanyBrainMindMap:
@@ -546,8 +578,32 @@ def review_suggestions(contract: Contract) -> list[dict[str, str]]:
     return suggestions
 
 
+def _reject_zip_bombs(filename: str, content: bytes, max_ratio: int) -> None:
+    try:
+        with zipfile.ZipFile(io.BytesIO(content)) as zf:
+            total_uncompressed = 0
+            total_compressed = 0
+            for info in zf.infolist():
+                total_uncompressed += info.file_size
+                total_compressed += info.compress_size
+            if total_compressed > 0:
+                ratio = total_uncompressed / total_compressed
+                if ratio > max_ratio:
+                    raise ValueError(
+                        f"{filename} is suspiciously compressed (ratio {ratio:.0f}x > {max_ratio}x cap)."
+                    )
+    except zipfile.BadZipFile as error:
+        raise ValueError(f"{filename} is not a valid DOCX archive.") from error
+
+
 def extract_pdf_document(filename: str, content: bytes) -> tuple[str, list[dict[str, Any]]]:
+    from .limits import MAX_PDF_PAGES  # local import avoids cycle at module load
+
     reader = PdfReader(io.BytesIO(content))
+    if len(reader.pages) > MAX_PDF_PAGES:
+        raise ValueError(
+            f"{filename} has {len(reader.pages)} pages; the cap is {MAX_PDF_PAGES}."
+        )
     sections = []
     parts = []
     cursor = 0
@@ -569,8 +625,15 @@ def extract_pdf_document(filename: str, content: bytes) -> tuple[str, list[dict[
 
 
 def extract_docx_document(filename: str, content: bytes) -> tuple[str, list[dict[str, Any]]]:
+    from .limits import DOCX_MAX_RATIO, MAX_DOCX_PARAGRAPHS  # local import avoids cycle
+
+    _reject_zip_bombs(filename, content, DOCX_MAX_RATIO)
     document = Document(io.BytesIO(content))
     paragraphs = [paragraph.text.strip() for paragraph in document.paragraphs if paragraph.text.strip()]
+    if len(paragraphs) > MAX_DOCX_PARAGRAPHS:
+        raise ValueError(
+            f"{filename} has {len(paragraphs)} paragraphs; the cap is {MAX_DOCX_PARAGRAPHS}."
+        )
     sections = []
     parts = []
     cursor = 0
@@ -599,6 +662,94 @@ def analyze_uploaded_contract(playbook_id: str, filename: str, content: bytes) -
     return analyze_contract(playbook_id, filename, text, sections)
 
 
+def build_contract_review_artifact(playbook_id: str, filename: str, content: bytes) -> StreamingResponse:
+    result = analyze_uploaded_contract(playbook_id, filename, content)
+    warnings: list[str] = []
+    annotated_name, annotated_content = annotate_contract_document(filename, content, result["findings"], warnings)
+    review_payload = {
+        "contract": result["contract"],
+        "findings": result["findings"],
+        "highlights": result["highlights"],
+        "risk_posterior": result["risk_posterior"],
+        "warnings": warnings,
+    }
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, mode="w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr(annotated_name, annotated_content)
+        archive.writestr("review.json", json.dumps(jsonable_encoder(review_payload), indent=2))
+    output.seek(0)
+    base = Path(filename).stem or "contract"
+    return StreamingResponse(
+        output,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{base}-lou-review.zip"'},
+    )
+
+
+def annotate_contract_document(
+    filename: str,
+    content: bytes,
+    findings: list[ContractFinding],
+    warnings: list[str],
+) -> tuple[str, bytes]:
+    lower = filename.lower()
+    if lower.endswith(".pdf"):
+        return f"annotated-{Path(filename).stem}.pdf", annotate_pdf_contract(filename, content, findings, warnings)
+    if lower.endswith(".docx"):
+        return f"annotated-{Path(filename).stem}.docx", annotate_docx_contract(filename, content, findings, warnings)
+    raise ValueError("Upload a text-based PDF or DOCX contract.")
+
+
+def annotate_pdf_contract(filename: str, content: bytes, findings: list[ContractFinding], warnings: list[str]) -> bytes:
+    document = fitz.open(stream=content, filetype="pdf")
+    for finding in findings:
+        excerpt = finding.excerpt.strip()
+        if not excerpt:
+            continue
+        matched = False
+        for page in document:
+            for rect in page.search_for(excerpt):
+                annotation = page.add_highlight_annot(rect)
+                annotation.set_info(title="Lou", content=f"{finding.topic}: {finding.recommendation}")
+                annotation.update()
+                matched = True
+        if not matched:
+            warnings.append(f"Excerpt not present in {filename}: {excerpt[:120]}")
+    output = io.BytesIO()
+    document.save(output)
+    document.close()
+    return output.getvalue()
+
+
+def annotate_docx_contract(filename: str, content: bytes, findings: list[ContractFinding], warnings: list[str]) -> bytes:
+    document = Document(io.BytesIO(content))
+    for finding in findings:
+        excerpt = finding.excerpt.strip()
+        if not excerpt:
+            continue
+        matched = False
+        for paragraph in document.paragraphs:
+            if excerpt not in paragraph.text:
+                continue
+            matched = True
+            run_matched = False
+            for run in paragraph.runs:
+                if excerpt in run.text:
+                    run.font.highlight_color = WD_COLOR_INDEX.YELLOW
+                    run_matched = True
+            if not run_matched:
+                for run in paragraph.runs:
+                    run.font.highlight_color = WD_COLOR_INDEX.YELLOW
+                warnings.append(
+                    f"Exact run boundaries were not preserved for excerpt in {filename}: {excerpt[:120]}"
+                )
+        if not matched:
+            warnings.append(f"Excerpt not present in {filename}: {excerpt[:120]}")
+    output = io.BytesIO()
+    document.save(output)
+    return output.getvalue()
+
+
 def infer_topic(text: str) -> str:
     lower = text.lower()
     if "non-solicit" in lower or "employee" in lower:
@@ -617,7 +768,7 @@ def normalize_language(language: str) -> str:
 
 
 def voice_session(playbook_id: str | None, language: str = "en") -> dict[str, Any]:
-    api_key_present = bool(settings.SLNG_API_KEY)
+    api_key_present = bool(current_slng_key(settings.SLNG_API_KEY))
     selected_language = normalize_language(language)
     return {
         "provider": "SLNG",
@@ -626,28 +777,28 @@ def voice_session(playbook_id: str | None, language: str = "en") -> dict[str, An
         "language": selected_language,
         "supported_languages": sorted(set(settings.VOICE_LANGUAGES)),
         "stt": {
-            "model": SLNG_STT_MODEL,
-            "http_url": SLNG_STT_HTTP_URL,
-            "websocket_url": f"wss://api.slng.ai{SLNG_STT_PATH}",
+            "model": settings.SLNG_STT_MODEL,
+            "http_url": _slng_stt_http_url(),
+            "websocket_url": _slng_stt_ws_url(),
             "request": {
                 "language": selected_language,
                 "diarize": True,
                 "punctuate": True,
                 "smart_format": True,
                 "utterances": True,
-                "keywords": ["confidentiality", "residual knowledge", "non-solicit", "data protection"],
+                "keywords": list(settings.SLNG_STT_KEYWORDS),
             },
         },
         "tts": {
-            "model": SLNG_TTS_MODEL,
-            "http_url": SLNG_TTS_HTTP_URL,
-            "websocket_url": f"wss://api.slng.ai{SLNG_TTS_PATH}",
+            "model": settings.SLNG_TTS_MODEL,
+            "http_url": _slng_tts_http_url(),
+            "websocket_url": _slng_tts_ws_url(),
             "request": {
-                "speaker": "luna",
-                "text": "Lou is listening for proposed playbook updates.",
+                "speaker": settings.SLNG_TTS_SPEAKER,
+                "text": settings.SLNG_TTS_GREETING,
                 "audioFormat": "audio/wav",
-                "sample_rate": 24000,
-                "speed": 1,
+                "sample_rate": settings.SLNG_TTS_SAMPLE_RATE,
+                "speed": settings.SLNG_TTS_SPEED,
             },
         },
         "auth_note": "Browser WebSocket clients cannot set Authorization headers; proxy through the backend or pass a short-lived token as a query parameter.",
@@ -754,7 +905,8 @@ def transcribe_audio_with_slng(
     content_type: str | None,
     language: str = "en",
 ) -> dict[str, Any]:
-    if not settings.SLNG_API_KEY:
+    slng_key = current_slng_key(settings.SLNG_API_KEY)
+    if not slng_key:
         raise ValueError("Set LOU_SLNG_API_KEY or SLNG_API_KEY to enable recorded-audio transcription.")
     if not audio:
         raise ValueError("Recorded audio was empty.")
@@ -764,20 +916,20 @@ def transcribe_audio_with_slng(
     upload_type = content_type or "application/octet-stream"
 
     try:
-        with httpx.Client(timeout=60) as client:
-            response = client.post(
-                SLNG_STT_HTTP_URL,
-                headers={"Authorization": f"Bearer {settings.SLNG_API_KEY}"},
-                files={"audio": (upload_name, audio, upload_type)},
-                data={
-                    "language": selected_language,
-                    "diarize": "true",
-                    "punctuate": "true",
-                    "smart_format": "true",
-                    "utterances": "true",
-                },
-            )
-            response.raise_for_status()
+        response = httpx.post(
+            _slng_stt_http_url(),
+            headers={"Authorization": f"Bearer {slng_key}"},
+            files={"audio": (upload_name, audio, upload_type)},
+            data={
+                "language": selected_language,
+                "diarize": "true",
+                "punctuate": "true",
+                "smart_format": "true",
+                "utterances": "true",
+            },
+            timeout=60,
+        )
+        response.raise_for_status()
     except httpx.HTTPStatusError as error:
         detail = error.response.text[:500]
         raise ValueError(f"SLNG transcription failed with {error.response.status_code}: {detail}") from error
