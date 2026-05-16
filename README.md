@@ -155,6 +155,49 @@ npm run dev -- --host 127.0.0.1 --port 5173
 
 Role switching is available in the app sidebar. Each switch updates the demo session on the backend.
 
+## Product API Keys
+
+The sidebar role switch is only a local demo shortcut. Real API clients should authenticate with Lou API keys:
+
+```http
+Authorization: Bearer lou_xxxxx
+```
+
+An admin creates keys for each person or integration. The raw key is shown once, and Lou stores only a hash plus a short prefix. For local demo setup, switch to Admin in the UI or run the demo-login call first:
+
+```bash
+curl -X POST http://localhost:8000/api/session/demo-login \
+  -H "Content-Type: application/json" \
+  -d '{"role":"ADMIN"}'
+```
+
+Create a senior API key:
+
+```bash
+curl -X POST http://localhost:8000/api/api-keys \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Harvey integration","role":"SENIOR"}'
+```
+
+Use the returned key from a terminal or another product:
+
+```bash
+curl http://localhost:8000/api/review \
+  -H "Authorization: Bearer lou_xxxxx"
+```
+
+List active keys:
+
+```bash
+curl http://localhost:8000/api/api-keys
+```
+
+Revoke a key:
+
+```bash
+curl -X DELETE http://localhost:8000/api/api-keys/key_id_here
+```
+
 ## Configuration
 
 All tunable constants live in `backend/app/config.py` as a `pydantic-settings` model. Override values through `.env` or `LOU_*` environment variables.
@@ -174,6 +217,7 @@ All tunable constants live in `backend/app/config.py` as a `pydantic-settings` m
 | --- | --- |
 | Health | `GET /api/health` |
 | Session | `POST /api/session/demo-login` |
+| API Keys | `POST /api/api-keys`, `GET /api/api-keys`, `DELETE /api/api-keys/{id}` |
 | Playbooks | `GET /api/playbooks`, `GET /api/playbooks/{id}`, `PATCH /api/playbooks/{id}/positions/{position_id}` |
 | Contracts | `GET /api/contracts`, `POST /api/contracts/analyze`, `POST /api/contracts/upload`, `GET /api/contracts/{id}` |
 | Voice | `POST /api/voice/session`, `POST /api/voice/transcript` |

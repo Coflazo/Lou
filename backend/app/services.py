@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import io
+import hashlib
 import json
 import re
+import secrets
 import uuid
+from contextvars import ContextVar, Token
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from threading import Lock
@@ -25,7 +28,9 @@ from .algorithms import (
 )
 from .algorithms.risk_scoring import RiskObservation
 from .config import settings
-from .db import init_db, write_snapshot
+from sqlmodel import Session, select
+
+from .db import ApiKeyRecord, engine, init_db, write_snapshot
 from .models import (
     Commit,
     Contract,
@@ -127,10 +132,94 @@ registry = AlgorithmRegistry()
 store = Store()
 store.reset()
 init_db()
+request_role: ContextVar[Role | None] = ContextVar("request_role", default=None)
+
+
+def set_request_role(role: Role) -> Token[Role | None]:
+    return request_role.set(role)
+
+
+def reset_request_role(token: Token[Role | None]) -> None:
+    request_role.reset(token)
+
+
+def active_role() -> Role:
+    return request_role.get() or store.current_role
 
 
 def role_at_least(role: Role) -> bool:
-    return ROLE_RANK[store.current_role] >= ROLE_RANK[role]
+    return ROLE_RANK[active_role()] >= ROLE_RANK[role]
+
+
+def hash_api_key(key: str) -> str:
+    return hashlib.sha256(key.encode("utf-8")).hexdigest()
+
+
+def create_api_key(name: str, role: Role) -> dict[str, Any]:
+    clean_name = name.strip()
+    if not clean_name:
+        raise ValueError("API key name is required.")
+    token = f"lou_{secrets.token_urlsafe(32)}"
+    record = ApiKeyRecord(
+        id=f"key-{uuid.uuid4().hex[:10]}",
+        name=clean_name,
+        key_hash=hash_api_key(token),
+        key_prefix=f"{token[:8]}...",
+        role=role.value,
+    )
+    with Session(engine) as session:
+        session.add(record)
+        session.commit()
+        session.refresh(record)
+    return {
+        "id": record.id,
+        "name": record.name,
+        "role": record.role,
+        "key_prefix": record.key_prefix,
+        "created_at": record.created_at,
+        "key": token,
+    }
+
+
+def list_api_keys() -> list[dict[str, Any]]:
+    with Session(engine) as session:
+        records = session.exec(select(ApiKeyRecord).where(ApiKeyRecord.revoked_at.is_(None))).all()
+    return [
+        {
+            "id": record.id,
+            "name": record.name,
+            "role": record.role,
+            "key_prefix": record.key_prefix,
+            "created_at": record.created_at,
+            "last_used_at": record.last_used_at,
+        }
+        for record in records
+    ]
+
+
+def revoke_api_key(key_id: str) -> bool:
+    with Session(engine) as session:
+        record = session.get(ApiKeyRecord, key_id)
+        if record is None or record.revoked_at is not None:
+            return False
+        record.revoked_at = datetime.now(timezone.utc).isoformat()
+        session.add(record)
+        session.commit()
+    return True
+
+
+def role_for_api_key(token: str) -> Role | None:
+    key_hash = hash_api_key(token)
+    with Session(engine) as session:
+        record = session.exec(
+            select(ApiKeyRecord).where(ApiKeyRecord.key_hash == key_hash, ApiKeyRecord.revoked_at.is_(None))
+        ).first()
+        if record is None:
+            return None
+        record.last_used_at = datetime.now(timezone.utc).isoformat()
+        session.add(record)
+        session.commit()
+        return Role(record.role)
 
 
 def summarize_playbook(playbook: Playbook) -> dict[str, Any]:
@@ -317,7 +406,7 @@ def create_proposal(
         source=source,
         proposed_text=proposed_text,
         rationale=rationale,
-        created_by_role=store.current_role,
+        created_by_role=active_role(),
         voice_match_scores=voice_match_scores,
         voice_session_id=voice_session_id,
         created_at=datetime.now(timezone.utc).isoformat(),
@@ -342,7 +431,7 @@ def suggested_proposal(
         source=source,
         proposed_text=proposed_text,
         rationale=rationale,
-        created_by_role=store.current_role,
+        created_by_role=active_role(),
         voice_match_scores=voice_match_scores,
         voice_session_id=voice_session_id,
         created_at=datetime.now(timezone.utc).isoformat(),

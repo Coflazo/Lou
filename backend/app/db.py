@@ -17,6 +17,17 @@ class AppSnapshot(SQLModel, table=True):
     updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
+class ApiKeyRecord(SQLModel, table=True):
+    id: str = Field(primary_key=True)
+    name: str
+    key_hash: str = Field(index=True, unique=True)
+    key_prefix: str
+    role: str
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    last_used_at: str | None = None
+    revoked_at: str | None = None
+
+
 def init_db() -> None:
     SQLModel.metadata.create_all(engine)
 

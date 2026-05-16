@@ -102,6 +102,11 @@ class LoginRequest(BaseModel):
     role: Role
 
 
+class ApiKeyCreateRequest(BaseModel):
+    name: str
+    role: Role = Role.JUNIOR
+
+
 class AnalyzeContractRequest(BaseModel):
     playbook_id: str
     name: str

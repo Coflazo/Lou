@@ -8,8 +8,11 @@ import pytest
 from docx import Document
 from pypdf import PdfWriter
 from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
+from sqlalchemy import delete
+from sqlmodel import Session
 
 from app import demo_data, services
+from app.db import ApiKeyRecord, engine
 from app.main import app
 
 
@@ -19,7 +22,13 @@ client = TestClient(app)
 @pytest.fixture(autouse=True)
 def reset_store():
     services.store.reset()
+    with Session(engine) as session:
+        session.exec(delete(ApiKeyRecord))
+        session.commit()
     yield
+    with Session(engine) as session:
+        session.exec(delete(ApiKeyRecord))
+        session.commit()
 
 
 def login(role: str) -> dict:
@@ -308,6 +317,49 @@ def test_review_permissions_and_approval_commit_updates_graph():
     playbook_id = review_items[0]["playbook_id"]
     brain = client.get(f"/api/playbooks/{playbook_id}/brain").json()
     assert any(node["kind"] == "commit" for node in brain["nodes"])
+
+
+def test_lou_api_keys_authenticate_api_clients_and_can_be_revoked():
+    login("ADMIN")
+    created = client.post("/api/api-keys", json={"name": "Terminal senior", "role": "SENIOR"})
+    assert created.status_code == 200
+    senior_key = created.json()
+    assert senior_key["key"].startswith("lou_")
+    assert senior_key["key_prefix"] == f"{senior_key['key'][:8]}..."
+
+    listed = client.get("/api/api-keys").json()
+    assert any(item["id"] == senior_key["id"] for item in listed)
+    assert all("key" not in item for item in listed)
+
+    playbook = client.get("/api/playbooks").json()[0]
+    submitted = client.post(
+        "/api/review/proposals",
+        json={
+            "playbook_id": playbook["id"],
+            "topic": "API Key Proposal",
+            "source": "terminal",
+            "proposed_text": "Add a position submitted from a terminal API client.",
+            "rationale": "A real API client should be able to submit work for review.",
+        },
+    )
+    assert submitted.status_code == 200
+
+    login("JUNIOR")
+    response = client.get("/api/review", headers={"Authorization": f"Bearer {senior_key['key']}"})
+    assert response.status_code == 200
+    assert any(item["id"] == submitted.json()["id"] for item in response.json())
+
+    login("ADMIN")
+    junior_key = client.post("/api/api-keys", json={"name": "Terminal junior", "role": "JUNIOR"}).json()
+    login("SENIOR")
+    forbidden = client.get("/api/review", headers={"Authorization": f"Bearer {junior_key['key']}"})
+    assert forbidden.status_code == 403
+
+    login("ADMIN")
+    revoked = client.delete(f"/api/api-keys/{senior_key['id']}")
+    assert revoked.status_code == 200
+    unauthorized = client.get("/api/review", headers={"Authorization": f"Bearer {senior_key['key']}"})
+    assert unauthorized.status_code == 401
 
 
 def test_playbook_brain_exposes_topic_islands_and_relation_edges():
