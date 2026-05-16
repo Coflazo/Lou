@@ -1,0 +1,101 @@
+:root {
+  --color-paper: oklch(95.8% 0.010 89);
+  --color-warm-gray: oklch(67.2% 0.008 100);
+  --color-warm-gray-soft: oklch(86.4% 0.006 90);
+  --color-ink: oklch(15.6% 0.006 265);
+  --color-ink-soft: oklch(28.1% 0.008 264);
+  --color-amber: oklch(76.8% 0.118 75);
+  --color-amber-soft: oklch(89.2% 0.060 80);
+  --color-green: oklch(44.1% 0.088 155);
+  --color-green-soft: oklch(82.4% 0.040 158);
+  --color-red: oklch(48.6% 0.118 22);
+  --color-red-soft: oklch(82.2% 0.056 22);
+
+  --surface-base: oklch(95.8% 0.010 89);
+  --surface-raised: oklch(97.4% 0.007 89);
+  --surface-sunken: oklch(93.1% 0.013 89);
+  --surface-overlay: oklch(15.6% 0.006 265 / 0.86);
+
+  --border-soft: oklch(86.0% 0.008 100);
+  --border-strong: oklch(72.0% 0.010 100);
+
+  --text-xs: 0.625rem;
+  --text-sm: 0.75rem;
+  --text-base: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.2rem;
+  --text-xl: 1.44rem;
+  --text-2xl: 1.728rem;
+  --text-3xl: 2.074rem;
+  --text-4xl: 2.488rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 128px;
+
+  --shadow-1: 0 1px 0 oklch(0% 0 0 / 0.04), 0 1px 2px oklch(0% 0 0 / 0.04);
+  --shadow-2: 0 4px 10px oklch(0% 0 0 / 0.06);
+  --shadow-3: 0 18px 40px oklch(0% 0 0 / 0.10);
+  --shadow-4: 0 30px 60px oklch(0% 0 0 / 0.18);
+
+  --duration-fast: 160ms;
+  --duration-base: 240ms;
+  --duration-slow: 420ms;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--surface-base);
+  color: var(--color-ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, sans-serif;
+  font-size: var(--text-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::selection {
+  background: var(--color-amber-soft);
+  color: var(--color-ink);
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
