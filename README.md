@@ -79,8 +79,8 @@ Three roles gate the workflow:
 
 | Role | Reads | Writes | Admin |
 |------|-------|--------|-------|
-| **Junior counsel** | playbooks, contracts, voice transcripts, mind map | propose updates, upload contracts | — |
-| **Senior counsel** | everything Junior reads | edit positions, approve/reject/commit, export | — |
+| **Junior counsel** | playbooks, contracts, voice transcripts, mind map | propose updates, upload contracts | - |
+| **Senior counsel** | everything Junior reads | edit positions, approve/reject/commit, export | - |
 | **Legal operations / Admin** | everything | import playbooks, manage API keys | Company Brain |
 
 ## Live tour of the product
@@ -158,19 +158,19 @@ contract negotiations into review-ready proposals.
 
 Lou uses SLNG in three places, all gated behind a request-scoped API key:
 
-1. **Voice session config** — `POST /api/voice/session` returns the SLNG STT and
+1. **Voice session config** - `POST /api/voice/session` returns the SLNG STT and
    TTS endpoints, the model IDs (`deepgram/nova:3`, `slng/rime/arcana:3-en`),
    keyword bias list, and the language picker (en / fr / nl / de). The browser
    uses this metadata to drive a live listening UI. When no SLNG key is
    configured the same endpoint returns `mode: "transcript-fallback"` so the UI
    degrades gracefully.
 
-2. **Audio upload transcription** — `POST /api/voice/audio-transcript`
+2. **Audio upload transcription** - `POST /api/voice/audio-transcript`
    accepts a recorded blob (typically `audio/webm;codecs=opus` from a phone's
    microphone), forwards it to SLNG's STT HTTP endpoint with bearer auth, and
    returns diarized speaker segments plus a voice-matched proposal list.
 
-3. **Pasted-transcript fallback** — `POST /api/voice/transcript` runs the same
+3. **Pasted-transcript fallback** - `POST /api/voice/transcript` runs the same
    voice matcher on a text transcript so users without an SLNG key can still
    capture decisions from a call.
 
@@ -195,7 +195,7 @@ the `X-Lou-SLNG-Key` header on a single request and never stored server-side.
 that powers Lou's playbooks. Pioneer's chat completion API was used in two
 passes:
 
-1. **Playbook seed generation** — [`scripts/generate_lou_dataset.py`](scripts/generate_lou_dataset.py)
+1. **Playbook seed generation** - [`scripts/generate_lou_dataset.py`](scripts/generate_lou_dataset.py)
    posts 50 prompts to Pioneer (model `Qwen/Qwen3-8B`), one per playbook topic,
    each requesting a row with: Topic, Preferred Position, Fallback 1–3, Red
    Line, Deal Breaker. The result lives at
@@ -204,13 +204,13 @@ passes:
    `demo-data/pioneer-playbook-generation-request.json` and
    `demo-data/pioneer-playbook-generation-response.json`.
 
-2. **Position matrix expansion** — [`scripts/generate_lou_playbook_matrix.py`](scripts/generate_lou_playbook_matrix.py)
+2. **Position matrix expansion** - [`scripts/generate_lou_playbook_matrix.py`](scripts/generate_lou_playbook_matrix.py)
    then expands each of the 50 playbooks into 50 positions, producing the
    2,500-row matrix at `demo-data/lou-pioneer-playbook-matrix-50x50.jsonl`
    (also rendered as XLSX). Recovery logic retries when Pioneer returns empty
    rows and falls back to a curated topic list rather than fabricating data.
 
-3. **Runtime materialization** — [`scripts/materialize_runtime_playbooks.py`](scripts/materialize_runtime_playbooks.py)
+3. **Runtime materialization** - [`scripts/materialize_runtime_playbooks.py`](scripts/materialize_runtime_playbooks.py)
    converts the Pioneer output into the two runtime JSONL files the backend
    loads on startup: `demo-data/playbooks.jsonl` and
    `demo-data/playbook_positions.jsonl`.
@@ -223,7 +223,7 @@ LOU_PIONEER_BASE=https://api.pioneer.ai
 ```
 
 Generated Pioneer artifacts are **review artifacts**, not hidden product logic
-— they are checked into the repo so you can audit exactly what prompt was sent
+- they are checked into the repo so you can audit exactly what prompt was sent
 and what came back.
 
 ## Quick start
@@ -238,7 +238,7 @@ That single script:
 
 - Creates a Python 3.13 virtualenv and installs `backend/requirements.txt`.
 - Installs frontend dependencies.
-- Materializes Pioneer playbooks into runtime JSONL (idempotent — skips if the
+- Materializes Pioneer playbooks into runtime JSONL (idempotent - skips if the
   dataset already exists).
 - Runs the backend test suite.
 - Runs the frontend test suite.
@@ -276,7 +276,7 @@ LOU_REUSE_RUNNING=1 ./scripts/launch_lou.sh
 > specs green), `npm pack --dry-run` clean, and carries complete metadata
 > (license, repository, bugs, keywords, `publishConfig.access=public`). The
 > only blocker for `npm install -g @lou-ai/cli` is reserving the **`@lou-ai`
-> org** on npm — free, ~30 seconds at
+> org** on npm - free, ~30 seconds at
 > [npmjs.com/org/create](https://www.npmjs.com/org/create) (pick the
 > "Unlimited public packages" free plan). After that, run from the repo root:
 >
@@ -377,7 +377,7 @@ PIONEER_API_KEY=pio_sk_...
 ```
 
 `launch_lou.sh` reads this file and exports the values **only into the backend
-process** — never into the frontend build or test runners.
+process** - never into the frontend build or test runners.
 
 ## Full CLI reference
 
@@ -391,7 +391,7 @@ lou login --role senior            # demo role switch (Junior | Senior | Admin)
 # playbooks
 lou playbooks                                                          # list
 lou playbooks show pb-01-nda-negotiation-and-enforcement-playbook      # detail
-lou playbooks import                                                   # admin only — reset from runtime data
+lou playbooks import                                                   # admin only - reset from runtime data
 lou edit pb-01-... --position pos-id --set "Preferred Position=Updated text"
 
 # contracts
@@ -544,7 +544,7 @@ Notable production-grade hardening built into the backend:
   `LOU_RATE_LIMIT_PER_MINUTE` (default 600 / about 10 req/s sustained), with
   `Retry-After`. `/api/health` and `/api/session/demo-login` are exempt so
   liveness probes and role switches never drain the bucket. Single-process
-  only — swap for Redis if you scale horizontally.
+  only - swap for Redis if you scale horizontally.
 - **Structured JSON logging.** `backend/app/logging_config.py` emits one JSON
   object per log line with a `request_id` correlation token; every response
   carries `X-Request-ID`.
@@ -569,10 +569,10 @@ Notable production-grade hardening built into the backend:
 | `LOU_API_BASE` | `http://localhost:8000` | CLI default backend URL |
 | `LOU_SECRET_KEY` | `lou-dev-secret-rotate-in-production` | JWT signing secret (rotate in prod!) |
 | `LOU_CORS_ORIGINS` | `localhost:5173,…` | Comma-separated allowlist |
-| `LOU_OPENAI_API_KEY` | — | Optional, enables OpenAI command parsing + draft generation |
+| `LOU_OPENAI_API_KEY` | - | Optional, enables OpenAI command parsing + draft generation |
 | `LOU_OPENAI_MODEL` | `gpt-4o-mini` | OpenAI chat model |
 | `LOU_OPENAI_EMBEDDING_MODEL` | `text-embedding-3-small` | OpenAI embedding model |
-| `LOU_SLNG_API_KEY` | — | Optional, enables SLNG live STT |
+| `LOU_SLNG_API_KEY` | - | Optional, enables SLNG live STT |
 | `LOU_SLNG_API_BASE_HTTP` | `https://api.slng.ai` | SLNG HTTP base |
 | `LOU_SLNG_STT_MODEL` | `deepgram/nova:3` | SLNG STT model id |
 | `LOU_SLNG_TTS_MODEL` | `slng/rime/arcana:3-en` | SLNG TTS model id |
@@ -586,7 +586,7 @@ Notable production-grade hardening built into the backend:
 | `LOU_MAX_DOCX_PARAGRAPHS` | `10000` | DOCX paragraph cap |
 | `LOU_RATE_LIMIT_PER_MINUTE` | `600` | Token-bucket size (`/api/health` and `/api/session/demo-login` are exempt) |
 | `LOU_DOCX_MAX_COMPRESSION_RATIO` | `100` | DOCX zip-bomb guard |
-| `PIONEER_API_KEY` | — | Required only when regenerating the Pioneer dataset |
+| `PIONEER_API_KEY` | - | Required only when regenerating the Pioneer dataset |
 
 ## Datasets and demo contracts
 
@@ -673,7 +673,7 @@ Lou/
 │   ├── vite.config.ts
 │   └── vitest.config.ts
 ├── packages/
-│   └── lou-cli/                     # @lou-ai/cli — npm-installable Lou CLI
+│   └── lou-cli/                     # @lou-ai/cli - npm-installable Lou CLI
 │       ├── bin/lou.ts               # Entry shim
 │       ├── src/cli.ts               # Command router (status, login, playbooks, contracts, review, voice, brain, keys, export, command, review-contract, configure)
 │       ├── src/http.ts              # LouClient: provider-key forwarding, timeouts, error envelope
@@ -711,13 +711,13 @@ PYTHONPATH=backend .venv/bin/python -m pytest backend/tests -q
 # Legacy Python CLI (7 tests)
 .venv/bin/python -m pytest tests -q
 
-# Frontend (7 tests — Vitest + Testing Library)
+# Frontend (7 tests - Vitest + Testing Library)
 npm --prefix frontend test -- --run
 
 # Frontend production build
 npm --prefix frontend run build
 
-# npm CLI (11 tests — Vitest)
+# npm CLI (11 tests - Vitest)
 npm --prefix packages/lou-cli test
 npm --prefix packages/lou-cli run build
 npm --prefix packages/lou-cli run pack:dry
@@ -755,7 +755,7 @@ See [ROADMAP.md](ROADMAP.md) for the long list.
 - **OpenAI** for the optional command-routing and contract-drafting paths.
 - **Phosphor Icons**, **Framer Motion**, **Zustand**, **TanStack Query**,
   **Tailwind**, **Vite**, **FastAPI**, **SQLModel**, **PyMuPDF**, **scikit-learn**,
-  **scipy**, **rank-bm25**, **jellyfish** — the open-source stack Lou is built on.
+  **scipy**, **rank-bm25**, **jellyfish** - the open-source stack Lou is built on.
 
 ## License
 
