@@ -111,6 +111,19 @@ export const api = {
       body: JSON.stringify(payload),
     }),
   listReview: () => request<Proposal[]>("/api/review"),
+  createReviewProposal: (payload: {
+    playbook_id: string;
+    topic: string;
+    source: string;
+    proposed_text: string;
+    rationale: string;
+    voice_match_scores?: Proposal["voice_match_scores"];
+    voice_session_id?: string | null;
+  }) =>
+    request<Proposal>("/api/review/proposals", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
   approveProposal: (proposalId: string, editedText?: string | null) =>
     request<{ proposal: Proposal; commit: Commit }>(`/api/review/${proposalId}/approve`, {
       method: "POST",

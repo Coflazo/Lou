@@ -326,6 +326,29 @@ def create_proposal(
     return proposal
 
 
+def suggested_proposal(
+    playbook_id: str,
+    topic: str,
+    source: str,
+    proposed_text: str,
+    rationale: str,
+    voice_match_scores: dict | None = None,
+    voice_session_id: str | None = None,
+) -> Proposal:
+    return Proposal(
+        id=f"suggestion-{uuid.uuid4().hex[:10]}",
+        playbook_id=playbook_id,
+        topic=topic,
+        source=source,
+        proposed_text=proposed_text,
+        rationale=rationale,
+        created_by_role=store.current_role,
+        voice_match_scores=voice_match_scores,
+        voice_session_id=voice_session_id,
+        created_at=datetime.now(timezone.utc).isoformat(),
+    )
+
+
 def _find_position(playbook: Playbook, position_id: str) -> PlaybookPosition | None:
     return next((item for item in playbook.positions if item.id == position_id), None)
 
@@ -386,7 +409,7 @@ def analyze_contract(
             )
             observations.append(RiskObservation(risk_label=risk_label, weight=0.5))
             proposed_updates.append(
-                create_proposal(
+                suggested_proposal(
                     playbook_id=playbook_id,
                     topic=topic,
                     source="contract",
@@ -741,7 +764,7 @@ def transcript_to_updates(playbook_id: str, transcript: str, language: str = "en
         ]
         topic = matches[0].topic if matches else infer_topic(sentence)
         proposals.append(
-            create_proposal(
+            suggested_proposal(
                 playbook_id=playbook_id,
                 topic=topic,
                 source="voice",
@@ -753,7 +776,7 @@ def transcript_to_updates(playbook_id: str, transcript: str, language: str = "en
 
     if not proposals:
         proposals.append(
-            create_proposal(
+            suggested_proposal(
                 playbook_id=playbook_id,
                 topic="Meeting Follow-up",
                 source="voice",
@@ -762,7 +785,6 @@ def transcript_to_updates(playbook_id: str, transcript: str, language: str = "en
             )
         )
 
-    persist_state()
     return {
         "mode": "transcript-fallback",
         "language": normalize_language(language),

@@ -122,6 +122,8 @@ def test_contract_analysis_maps_known_and_unknown_clauses():
     assert any(finding["status"] == "mapped" for finding in body["findings"])
     assert any(finding["status"] == "unmapped" for finding in body["findings"])
     assert any(item["source"] == "contract" for item in body["proposed_updates"])
+    login("SENIOR")
+    assert client.get("/api/review").json() == []
 
 
 def test_contract_upload_extracts_text_and_returns_review_payload():
@@ -174,6 +176,8 @@ def test_voice_transcript_creates_proposed_updates():
     body = response.json()
     assert body["mode"] == "transcript-fallback"
     assert len(body["proposed_updates"]) >= 1
+    login("SENIOR")
+    assert client.get("/api/review").json() == []
 
 
 def test_voice_audio_upload_transcribes_with_slng_and_creates_updates(monkeypatch):
@@ -212,6 +216,8 @@ def test_voice_audio_upload_transcribes_with_slng_and_creates_updates(monkeypatc
     assert "residual knowledge" in body["transcript"]
     assert body["speaker_segments"][0]["speaker"] == "Speaker 1"
     assert len(body["proposed_updates"]) >= 1
+    login("SENIOR")
+    assert client.get("/api/review").json() == []
 
 
 def test_slng_diarization_words_become_speaker_separated_notes():
@@ -277,6 +283,19 @@ def test_review_permissions_and_approval_commit_updates_graph():
     login("JUNIOR")
     pending = client.get("/api/review")
     assert pending.status_code == 403
+
+    playbook = client.get("/api/playbooks").json()[0]
+    created = client.post(
+        "/api/review/proposals",
+        json={
+            "playbook_id": playbook["id"],
+            "topic": "Residual Knowledge",
+            "source": "voice",
+            "proposed_text": "Add a residual knowledge position from the negotiation notes.",
+            "rationale": "Junior explicitly submitted this suggestion for senior review.",
+        },
+    )
+    assert created.status_code == 200
 
     login("SENIOR")
     review_items = client.get("/api/review").json()

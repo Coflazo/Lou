@@ -177,7 +177,7 @@ All tunable constants live in `backend/app/config.py` as a `pydantic-settings` m
 | Playbooks | `GET /api/playbooks`, `GET /api/playbooks/{id}`, `PATCH /api/playbooks/{id}/positions/{position_id}` |
 | Contracts | `GET /api/contracts`, `POST /api/contracts/analyze`, `POST /api/contracts/upload`, `GET /api/contracts/{id}` |
 | Voice | `POST /api/voice/session`, `POST /api/voice/transcript` |
-| Review | `GET /api/review`, `POST /api/review/{id}/approve`, `POST /api/review/{id}/reject` |
+| Review | `GET /api/review`, `POST /api/review/proposals`, `POST /api/review/{id}/approve`, `POST /api/review/{id}/reject` |
 | Company Brain | `GET /api/company-brain`, `GET /api/playbooks/{id}/brain` |
 | Export | `GET /api/export/json`, `GET /api/export/xlsx`, `GET /api/export/png` |
 | Commands | `POST /api/lou-command` |

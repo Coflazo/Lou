@@ -124,6 +124,16 @@ class VoiceContractRequest(BaseModel):
     language: str = "en"
 
 
+class ProposalCreateRequest(BaseModel):
+    playbook_id: str
+    topic: str
+    source: str
+    proposed_text: str
+    rationale: str
+    voice_match_scores: Optional[dict] = None
+    voice_session_id: Optional[str] = None
+
+
 class ReviewActionRequest(BaseModel):
     edited_text: Optional[str] = None
     reason: Optional[str] = None

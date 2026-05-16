@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/layout";
 import { Button, Select, Textarea } from "@/components/primitives";
 import { VoiceOrb, WaveformViz, TranscriptRoll, type TranscriptSegment } from "@/components/voice";
 import { ProposalCard } from "@/components/data";
-import { usePlaybooks, useVoiceAudioTranscript, useVoiceContractFromNotes, useVoiceTranscript } from "@/hooks/useApi";
+import { useCreateReviewProposal, usePlaybooks, useVoiceAudioTranscript, useVoiceContractFromNotes, useVoiceTranscript } from "@/hooks/useApi";
 import { useVoiceRecorder } from "@/hooks/useVoice";
 import { COPY } from "@/lib/constants";
 import type { Proposal } from "@/types";
@@ -23,6 +23,7 @@ export function VoiceSessionPage() {
   const transcribe = useVoiceTranscript();
   const transcribeAudio = useVoiceAudioTranscript();
   const createContract = useVoiceContractFromNotes();
+  const createReviewProposal = useCreateReviewProposal();
   const recorder = useVoiceRecorder();
   const navigate = useNavigate();
   const lastTranscribedBlob = useRef<Blob | null>(null);
@@ -188,7 +189,20 @@ export function VoiceSessionPage() {
               </motion.p>
             )}
             {proposals.map((proposal) => (
-              <ProposalCard key={proposal.id} proposal={proposal} />
+              <ProposalCard
+                key={proposal.id}
+                proposal={proposal}
+                actions={
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    loading={createReviewProposal.isPending && createReviewProposal.variables?.topic === proposal.topic}
+                    onClick={() => createReviewProposal.mutate(proposal)}
+                  >
+                    Send to review
+                  </Button>
+                }
+              />
             ))}
           </AnimatePresence>
         </div>

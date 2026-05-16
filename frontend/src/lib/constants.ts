@@ -59,7 +59,7 @@ export const COPY = {
   REVIEW: {
     QUEUE_TITLE: "Review queue",
     QUEUE_SUBTITLE: "Proposals waiting on senior counsel approval.",
-    EMPTY: "Inbox is clear. Voice or contract proposals will show up here.",
+    EMPTY: "Inbox is clear. Submitted proposals will show up here.",
     APPROVE: "Approve",
     REJECT: "Reject",
     APPROVED: "Approved. The playbook version moved forward.",
@@ -68,7 +68,7 @@ export const COPY = {
   },
   VOICE: {
     TITLE: "Voice session",
-    SUBTITLE: "Capture decisions as they happen. Lou turns transcripts into proposals.",
+    SUBTITLE: "Capture decisions as they happen. Lou turns transcripts into review-ready suggestions.",
     START: "Start listening",
     STOP: "Stop session",
     LISTENING: "Listening",

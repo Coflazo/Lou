@@ -113,6 +113,14 @@ export function useRejectProposal() {
   });
 }
 
+export function useCreateReviewProposal() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: api.createReviewProposal,
+    onSuccess: () => client.invalidateQueries({ queryKey: queryKeys.review }),
+  });
+}
+
 export function useUpdatePosition() {
   const client = useQueryClient();
   return useMutation({
