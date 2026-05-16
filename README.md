@@ -1,4 +1,7 @@
-# Lou
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="frontend/public/lou-wordmark-on-dark.png">
+  <img alt="Lou" src="frontend/public/lou-wordmark-on-light.png" height="48">
+</picture>
 
 Legal workspace for contract analysis, playbook negotiation, and voice-driven proposal capture.
 
