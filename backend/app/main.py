@@ -43,6 +43,11 @@ _UPLOAD_ROUTES = (
     "/api/voice/transcribe-audio",
 )
 
+# Paths exempt from the token-bucket rate limiter. Health probes and demo-login
+# would otherwise drain the bucket during normal interactive use and during the
+# `scripts/smoke_lou.py` integration test (which fires ~60 requests in a burst).
+_RATE_LIMIT_EXEMPT_PATHS = frozenset({"/api/health", "/api/session/demo-login"})
+
 
 @app.exception_handler(LouError)
 async def lou_error_handler(_request: Request, exc: LouError):
@@ -67,17 +72,18 @@ async def request_context(request: Request, call_next):
         except ValueError:
             pass
 
-    bucket_key = request.headers.get("authorization") or (
-        request.client.host if request.client else "anon"
-    )
-    allowed, retry_after = rate_limiter.check(bucket_key)
-    if not allowed:
-        err = rate_limited(retry_after)
-        return JSONResponse(
-            status_code=err.status_code,
-            content=err.detail,
-            headers={"Retry-After": str(retry_after), "X-Request-ID": request_id},
+    if request.url.path not in _RATE_LIMIT_EXEMPT_PATHS:
+        bucket_key = request.headers.get("authorization") or (
+            request.client.host if request.client else "anon"
         )
+        allowed, retry_after = rate_limiter.check(bucket_key)
+        if not allowed:
+            err = rate_limited(retry_after)
+            return JSONResponse(
+                status_code=err.status_code,
+                content=err.detail,
+                headers={"Retry-After": str(retry_after), "X-Request-ID": request_id},
+            )
 
     header = request.headers.get("authorization", "")
     token = header[7:].strip() if header.lower().startswith("bearer ") else ""

@@ -566,9 +566,10 @@ def test_rate_limit_returns_429_with_retry_after(monkeypatch):
     monkeypatch.setattr(rate_limit.rate_limiter, "refill_per_second", 0.0001)
     rate_limit.rate_limiter._buckets.clear()
 
-    assert client.get("/api/health").status_code == 200
-    assert client.get("/api/health").status_code == 200
-    limited = client.get("/api/health")
+    # /api/health and /api/session/demo-login are exempt; use /api/playbooks.
+    assert client.get("/api/playbooks").status_code == 200
+    assert client.get("/api/playbooks").status_code == 200
+    limited = client.get("/api/playbooks")
     assert limited.status_code == 429
     assert "Retry-After" in limited.headers
     assert limited.json()["error"]["code"] == "RATE_LIMITED"
