@@ -109,6 +109,9 @@ def main() -> None:
     )
     assert_true(status == 200 and transcript["proposed_updates"], "voice transcript fallback failed")
 
+    status, submitted = request("POST", "/api/review/proposals", transcript["proposed_updates"][0])
+    assert_true(status == 200 and submitted["status"] == "pending", "explicit review proposal submission failed")
+
     login("SENIOR")
     status, queue = request("GET", "/api/review")
     assert_true(status == 200 and queue, "senior review queue failed")
