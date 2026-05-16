@@ -1,0 +1,15 @@
+{"id": "ent-siemens", "label": "Siemens AG", "kind": "organization", "metadata": {"jurisdiction": "DE", "role": "client"}}
+{"id": "ent-legal-ops", "label": "Siemens Legal Ops", "kind": "team", "metadata": {"members": 14, "owner": true}}
+{"id": "ent-procurement", "label": "Global Procurement", "kind": "team", "metadata": {"members": 22}}
+{"id": "ent-vendor-acme", "label": "Acme Supplier", "kind": "vendor", "metadata": {"tier": "B"}}
+{"id": "ent-vendor-northwind", "label": "Northwind Logistics", "kind": "vendor", "metadata": {"tier": "A"}}
+{"id": "ent-policy-gdpr", "label": "GDPR Compliance", "kind": "policy", "metadata": {"jurisdiction": "EU"}}
+{"id": "ent-policy-trade", "label": "Trade-Control Policy", "kind": "policy", "metadata": {"jurisdiction": "Global"}}
+{"id": "ent-clause-confidentiality", "label": "Confidentiality Clause", "kind": "clause", "metadata": {}}
+{"id": "ent-clause-non-solicit", "label": "Non-Solicitation Clause", "kind": "clause", "metadata": {}}
+{"id": "ent-clause-residual", "label": "Residual Knowledge Clause", "kind": "clause", "metadata": {}}
+{"id": "ent-clause-indemnity", "label": "Indemnification Clause", "kind": "clause", "metadata": {}}
+{"id": "ent-clause-data-processing", "label": "Data Processing Clause", "kind": "clause", "metadata": {}}
+{"id": "ent-jurisdiction-eu", "label": "EU Jurisdiction", "kind": "jurisdiction", "metadata": {}}
+{"id": "ent-jurisdiction-us", "label": "US Jurisdiction", "kind": "jurisdiction", "metadata": {}}
+{"id": "ent-jurisdiction-apac", "label": "APAC Jurisdiction", "kind": "jurisdiction", "metadata": {}}

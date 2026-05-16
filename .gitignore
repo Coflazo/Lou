@@ -1,0 +1,16 @@
+.pytest_cache/
+__pycache__/
+*.pyc
+.DS_Store
+backend/lou.db
+lou.db
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.env
+api-keys.txt
+.venv/
+.lou-runtime/
+.deepeval/
+.vite/
+*.tsbuildinfo

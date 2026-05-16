@@ -1,0 +1,28 @@
+{
+  "provider": "pioneer",
+  "endpoint": "https://api.pioneer.ai/v1/chat/completions",
+  "model": "Qwen/Qwen3-8B",
+  "count": 50,
+  "columns": [
+    "Topic",
+    "Preferred Position",
+    "Fallback 1",
+    "Fallback 2",
+    "Fallback 3",
+    "Red Line",
+    "Deal Breaker"
+  ],
+  "schema": {
+    "items": [
+      {
+        "Topic": "string",
+        "Preferred Position": "string",
+        "Fallback 1": "string",
+        "Fallback 2": "string",
+        "Fallback 3": "string",
+        "Red Line": "string",
+        "Deal Breaker": "string"
+      }
+    ]
+  }
+}
