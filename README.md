@@ -1,64 +1,238 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="frontend/public/lou-wordmark-on-dark.png">
-  <img alt="Lou" src="frontend/public/lou-wordmark-on-light.png" height="48">
-</picture>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="frontend/public/lou-wordmark-on-dark.png">
+    <img alt="Lou" src="frontend/public/lou-wordmark-on-light.png" height="64">
+  </picture>
+</p>
 
-Legal workspace for contract analysis, playbook negotiation, and voice-driven proposal capture.
+<p align="center">
+  AI legal workspace for contract review, playbook negotiation, and voice-driven proposal capture.
+</p>
 
-- FastAPI backend with a typed algorithm registry: TF-IDF clause matching, Dirichlet-Categorical risk posteriors, HMM Viterbi section detection, Jaro-Winkler + edit-distance + TF-IDF voice alignment, BM25 + OpenAI semantic search, PageRank + betweenness + Louvain on the company brain.
-- React 18 + TypeScript frontend with a paper-and-ink design system in OKLCH, Instrument Serif display type, DM Mono numerals, Framer Motion springs, Tailwind tokens, TanStack Query, Zustand stores, D3-force graph layout.
+<p align="center">
+  Built for the <strong>{Tech: Europe} Paris AI Hackathon</strong>.
+</p>
 
-## Run
+## What Lou Does
 
-One-terminal launch:
+Lou helps legal teams turn contract review into controlled legal memory.
+
+A junior reviewer can upload a contract, map clauses against the company playbook, see risk and uncertainty, and propose updates. A senior lawyer can approve, reject, edit, export, and publish those changes back into the playbook. Voice notes and meeting transcripts can also become proposed playbook updates, so negotiation knowledge does not disappear after the call.
+
+The first version of this idea was only a proof of concept from an earlier event. It got early signal from Siemens Legal Operations and Legora. This repository is a from-zero rebuild for this hackathon: new backend, new frontend, new data layer, new algorithms, new design system, and a full demo workflow.
+
+## Demo Walkthrough
+
+Use this path for a 2-minute judge demo:
+
+1. Log in as **Junior** and open the Siemens Mutual NDA playbook.
+2. Upload or analyze a contract.
+3. Show mapped clauses, unmapped clauses, risk badges, and the Bayesian risk posterior.
+4. Open voice mode, paste or record a legal discussion, and generate proposed playbook updates.
+5. Switch to **Senior**, review a proposal, approve it, and show the commit.
+6. Switch to **Admin** and show Company Brain: clauses, policies, vendors, teams, and graph metrics.
+
+## Hackathon Partner Technologies
+
+Lou uses hackathon partner technologies in the core product path:
+
+| Partner | How Lou Uses It |
+| --- | --- |
+| **Pioneer by Fastino** | Generated the 50-record Siemens Mutual NDA playbook dataset. Each record includes one preferred position, three fallbacks, one red line, and one deal breaker. The generated records are checked into `demo-data/lou-pioneer-playbook-datasets-50.jsonl` and converted into the runtime JSONL seed files. |
+| **SLNG** | Powers the intended live voice path for STT/TTS. When `LOU_SLNG_API_KEY` is not set, Lou still runs in transcript fallback mode so judges can test the workflow without external credentials. |
+| **OpenAI** | Optional command parsing and dense semantic search fusion. Lou falls back to deterministic local behavior when `LOU_OPENAI_API_KEY` is absent. |
+
+## Product Surface
+
+- **Playbooks**: structured negotiation positions, fallbacks, red lines, deal breakers, and edit flow.
+- **Contracts**: upload/analyze text, PDF, or DOCX contracts against the selected playbook.
+- **Findings**: mapped and unmapped clauses with location, recommendation, risk, and match score.
+- **Review**: senior approval queue for playbook updates.
+- **Voice**: live voice-session contract plus transcript fallback for meeting-derived proposals.
+- **Company Brain**: graph view of teams, vendors, policies, clauses, and their relationships.
+- **Exports**: JSON, XLSX, and graph-image placeholder routes for review artifacts.
+
+## Technical Architecture
+
+### Backend
+
+- Python 3.13
+- FastAPI
+- SQLModel-style data models for the demo state
+- Pydantic Settings for configuration
+- JSONL seed data in `demo-data/`
+- Eight FastAPI routers:
+  - `auth`
+  - `playbooks`
+  - `contracts`
+  - `voice`
+  - `review`
+  - `exports`
+  - `brain`
+  - `commands`
+
+The backend is centered around an `AlgorithmRegistry` that owns fitted playbook matchers, risk scorers, section detectors, voice matchers, and graph metrics.
+
+### Algorithms
+
+Lou uses local, inspectable algorithms so the demo is not just a wrapper around an LLM:
+
+| Module | Purpose |
+| --- | --- |
+| `clause_matching.py` | TF-IDF sparse vectors and cosine similarity to map contract clauses to playbook positions. |
+| `risk_scoring.py` | Dirichlet-Categorical Bayesian posterior with 95% credible intervals for contract-level risk. |
+| `section_detector.py` | HMM Viterbi decoding in log-space to segment legal text into sections. |
+| `voice_matching.py` | Jaro-Winkler, edit distance, and TF-IDF matching to connect transcripts to playbook topics. |
+| `semantic_search.py` | BM25 plus optional OpenAI embeddings, fused with reciprocal rank fusion. |
+| `company_brain.py` | PageRank, betweenness centrality, and Louvain communities for the legal knowledge graph. |
+
+### Frontend
+
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- Framer Motion
+- TanStack Query
+- Zustand
+- D3 Force
+- React Dropzone
+
+The UI has a custom design system in `frontend/src/design-system/`: OKLCH color tokens, Instrument Serif display type, DM Mono data labels, geometric spacing, and motion presets.
+
+## Run Locally
+
+### One-Terminal Launch
 
 ```bash
 ./scripts/launch_lou.sh
 ```
 
-The launcher checks tooling, installs Python and Node dependencies, runs backend pytest and frontend Vitest suites, builds the production frontend, starts the FastAPI backend, executes the live smoke pass, and serves the Vite preview build.
+The launcher checks local tools, installs Python and Node dependencies, runs backend tests, runs frontend tests, builds the production frontend, starts the backend, runs live smoke checks, and serves the Vite preview build.
 
-Manual:
+Open:
 
-```bash
-# backend
-PYTHONPATH=backend uvicorn app.main:app --reload --port 8000
-
-# frontend
-cd frontend && npm install && npm run dev
+```text
+http://localhost:5173
 ```
 
-Open `http://localhost:5173`.
+Backend:
 
-## Roles
+```text
+http://localhost:8000
+```
 
-- **JUNIOR** — read playbooks, upload contracts, propose updates.
-- **SENIOR** — JUNIOR plus approve / reject proposals, edit positions, publish exports.
-- **ADMIN** — SENIOR plus the company brain graph and admin imports.
+If a port is already in use:
 
-Role switching is in the sidebar. Each switch issues a fresh demo session against the backend.
+```bash
+BACKEND_PORT=8010 FRONTEND_PORT=5180 ./scripts/launch_lou.sh
+```
+
+### Manual Development
+
+Backend:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r backend/requirements.txt
+PYTHONPATH=backend uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Frontend:
+
+```bash
+cd frontend
+npm install
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
+## Demo Roles
+
+- **JUNIOR**: read playbooks, analyze contracts, use listening mode, and submit proposed updates.
+- **SENIOR**: Junior permissions plus review approvals, playbook edits, commits, and exports.
+- **ADMIN**: Senior permissions plus Company Brain and admin import access.
+
+Role switching is available in the app sidebar. Each switch updates the demo session on the backend.
 
 ## Configuration
 
-All tunable constants live in `backend/app/config.py` as a `pydantic-settings` model. Override with `.env` or `LOU_*` environment variables. The important ones:
+All tunable constants live in `backend/app/config.py` as a `pydantic-settings` model. Override values through `.env` or `LOU_*` environment variables.
 
-| key | default | meaning |
+| Variable | Default | Meaning |
 | --- | --- | --- |
-| `LOU_SEED_DEMO_DATA` | `true` | seed in-memory store from `demo-data/*.jsonl` on startup |
-| `LOU_CLAUSE_MATCH_MIN_SCORE` | `0.22` | TF-IDF cosine threshold for "mapped" vs "unmapped" findings |
-| `LOU_VOICE_MATCH_THRESHOLD` | `0.55` | combined Jaro-Winkler + cosine + edit similarity gate for voice matches |
-| `LOU_RISK_PRIOR_ALPHA` | `2.0,2.0,2.0` | symmetric Dirichlet prior over Low/Medium/High |
-| `LOU_PAGERANK_DAMPING` | `0.85` | brain graph PageRank damping factor |
-| `LOU_OPENAI_API_KEY` | unset | enables OpenAI command parsing and dense semantic search fusion |
-| `LOU_SLNG_API_KEY` | unset | enables SLNG STT/TTS bridges; absent ⇒ transcript fallback |
+| `LOU_SEED_DEMO_DATA` | `true` | Seed the in-memory store from `demo-data/*.jsonl`. |
+| `LOU_CLAUSE_MATCH_MIN_SCORE` | `0.22` | TF-IDF cosine threshold for mapped findings. |
+| `LOU_VOICE_MATCH_THRESHOLD` | `0.55` | Voice-to-playbook matching threshold. |
+| `LOU_RISK_PRIOR_ALPHA` | `2.0,2.0,2.0` | Dirichlet prior for Low, Medium, High risk. |
+| `LOU_PAGERANK_DAMPING` | `0.85` | PageRank damping for Company Brain. |
+| `LOU_OPENAI_API_KEY` | unset | Enables OpenAI command parsing and dense semantic search. |
+| `LOU_SLNG_API_KEY` | unset | Enables live SLNG voice integrations. |
 
-## Demo data
+## API Overview
 
-All seed records live in `demo-data/*.jsonl` (one JSON object per line). `backend/app/seeder.py` is the idempotent loader. The legacy `siemens-mutual-nda-playbook.xlsx` is no longer required at runtime, but its 50-row schema was the source of the JSONL extraction.
+| Area | Routes |
+| --- | --- |
+| Health | `GET /api/health` |
+| Session | `POST /api/session/demo-login` |
+| Playbooks | `GET /api/playbooks`, `GET /api/playbooks/{id}`, `PATCH /api/playbooks/{id}/positions/{position_id}` |
+| Contracts | `GET /api/contracts`, `POST /api/contracts/analyze`, `POST /api/contracts/upload`, `GET /api/contracts/{id}` |
+| Voice | `POST /api/voice/session`, `POST /api/voice/transcript` |
+| Review | `GET /api/review`, `POST /api/review/{id}/approve`, `POST /api/review/{id}/reject` |
+| Company Brain | `GET /api/company-brain`, `GET /api/playbooks/{id}/brain` |
+| Export | `GET /api/export/json`, `GET /api/export/xlsx`, `GET /api/export/png` |
+| Commands | `POST /api/lou-command` |
+
+## Demo Data
+
+All runtime seed data lives in `demo-data/*.jsonl`, one JSON object per line:
+
+- `playbooks.jsonl`
+- `playbook_positions.jsonl`
+- `contracts.jsonl`
+- `proposals.jsonl`
+- `commits.jsonl`
+- `entities.jsonl`
+- `relations.jsonl`
+
+`demo-data/siemens-mutual-nda-playbook.xlsx` is kept as the original workbook source. It is not required at runtime.
 
 ## Tests
 
+Backend:
+
 ```bash
-python -m pytest backend/tests/      # 21 tests across algorithms + API flows
-cd frontend && npm test               # Vitest unit suite
+source .venv/bin/activate
+python -m pytest backend/tests/
 ```
+
+Frontend:
+
+```bash
+cd frontend
+npm test
+npm run build
+```
+
+Live smoke checks:
+
+```bash
+python scripts/smoke_lou.py http://localhost:8000
+```
+
+## Repository Map
+
+```text
+backend/app/              FastAPI app, routers, services, models, algorithms
+backend/tests/            Backend flow and algorithm tests
+frontend/src/             React app, design system, pages, components, hooks
+demo-data/                Pioneer-generated and runtime JSONL seed data
+scripts/                  Launch, smoke test, and dataset generation scripts
+cli/                      Small local CLI entrypoint
+```
+
+## Submission Notes
+
+- This project was built newly for the hackathon. An earlier event version existed only as a proof of concept; this repo is the rebuilt product.
+- The repository is structured for jury review: setup instructions, partner technology usage, API overview, test commands, and architecture notes are included here.
+- The app runs without paid API keys by using deterministic fallbacks and transcript mode. Adding `LOU_OPENAI_API_KEY` or `LOU_SLNG_API_KEY` unlocks the external integrations.
