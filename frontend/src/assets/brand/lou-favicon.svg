@@ -1,0 +1,10 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Lou favicon</title>
+  <desc id="desc">Lou nested monogram in white on an ink background.</desc>
+  <rect width="64" height="64" rx="8" fill="#111314"/>
+  <g stroke="#fffaf1" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M16.5 10.5V49.5H47.5" stroke-width="8"/>
+    <circle cx="31.5" cy="34.5" r="8.75" stroke-width="4.5"/>
+    <path d="M27.5 30V36.75C27.5 39.25 29.25 41 31.5 41C33.75 41 35.5 39.25 35.5 36.75V30" stroke-width="3.25"/>
+  </g>
+</svg>

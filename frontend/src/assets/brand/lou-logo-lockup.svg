@@ -1,0 +1,17 @@
+<svg width="448" height="160" viewBox="0 0 448 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Lou logo lockup</title>
+  <desc id="desc">Lou nested monogram beside the Lou wordmark, both in white.</desc>
+  <g transform="translate(24 24) scale(0.4375)" stroke="#fffaf1" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M66 42V198H190" stroke-width="32"/>
+    <circle cx="126" cy="138" r="35" stroke-width="18"/>
+    <path d="M110 120V147C110 157 117 164 126 164C135 164 142 157 142 147V120" stroke-width="13"/>
+  </g>
+  <text
+    x="154"
+    y="102"
+    fill="#fffaf1"
+    font-family="Avenir Next, Gill Sans, Trebuchet MS, Arial, sans-serif"
+    font-size="76"
+    font-weight="600"
+    letter-spacing="0.02em">Lou</text>
+</svg>

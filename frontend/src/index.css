@@ -1,0 +1,6 @@
+@import "./design-system/tokens.css";
+@import "./design-system/typography.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
