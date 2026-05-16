@@ -270,8 +270,27 @@ LOU_REUSE_RUNNING=1 ./scripts/launch_lou.sh
 
 ## Install the npm CLI
 
-The CLI is published as a scoped npm package and works against any Lou backend
-— local, self-hosted, or hosted.
+> [!IMPORTANT]
+> **The npm CLI is production-ready and waiting on a one-time publish.**
+> The package at `packages/lou-cli/` is fully built, fully tested (11 Vitest
+> specs green), `npm pack --dry-run` clean, and carries complete metadata
+> (license, repository, bugs, keywords, `publishConfig.access=public`). The
+> only blocker for `npm install -g @lou-ai/cli` is reserving the **`@lou-ai`
+> org** on npm — free, ~30 seconds at
+> [npmjs.com/org/create](https://www.npmjs.com/org/create) (pick the
+> "Unlimited public packages" free plan). After that, run from the repo root:
+>
+> ```bash
+> cd packages/lou-cli && npm login && npm publish
+> ```
+>
+> Until then, install directly from the repo with:
+>
+> ```bash
+> cd packages/lou-cli && npm pack && npm install -g ./lou-ai-cli-0.1.0.tgz
+> ```
+
+Once published, install globally:
 
 ```bash
 npm install -g @lou-ai/cli
