@@ -15,7 +15,7 @@ from fastapi.responses import StreamingResponse
 from openpyxl import Workbook
 from pypdf import PdfReader
 
-from .ai import parse_command_with_openai
+from .ai import draft_contract_from_notes, parse_command_with_openai
 from .algorithms import (
     BayesianRiskScorer,
     ClauseMatcher,
@@ -519,6 +519,7 @@ def voice_session(playbook_id: str | None, language: str = "en") -> dict[str, An
             "websocket_url": f"wss://api.slng.ai{SLNG_STT_PATH}",
             "request": {
                 "language": selected_language,
+                "diarize": True,
                 "punctuate": True,
                 "smart_format": True,
                 "utterances": True,
@@ -542,7 +543,77 @@ def voice_session(playbook_id: str | None, language: str = "en") -> dict[str, An
     }
 
 
+def extract_slng_speaker_segments(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    utterances = payload.get("utterances")
+    if not isinstance(utterances, list):
+        results = payload.get("results")
+        utterances = results.get("utterances") if isinstance(results, dict) else None
+    if isinstance(utterances, list):
+        segments = []
+        for index, utterance in enumerate(utterances, start=1):
+            if not isinstance(utterance, dict):
+                continue
+            text = str(utterance.get("transcript") or utterance.get("text") or "").strip()
+            if not text:
+                continue
+            speaker = utterance.get("speaker")
+            segments.append(
+                {
+                    "speaker": f"Speaker {int(speaker) + 1}" if isinstance(speaker, int) else f"Speaker {speaker or index}",
+                    "text": text,
+                    "start": utterance.get("start"),
+                    "end": utterance.get("end"),
+                }
+            )
+        if segments:
+            return segments
+
+    words: list[dict[str, Any]] = []
+    results = payload.get("results")
+    if isinstance(results, dict):
+        channels = results.get("channels")
+        if isinstance(channels, list):
+            for channel in channels:
+                if not isinstance(channel, dict):
+                    continue
+                alternatives = channel.get("alternatives", [])
+                if not isinstance(alternatives, list):
+                    continue
+                for alternative in alternatives:
+                    if isinstance(alternative, dict) and isinstance(alternative.get("words"), list):
+                        words.extend(word for word in alternative["words"] if isinstance(word, dict))
+
+    segments: list[dict[str, Any]] = []
+    current_speaker: Any = None
+    current_words: list[str] = []
+    current_start: Any = None
+    current_end: Any = None
+    for word in words:
+        speaker = word.get("speaker", 0)
+        token = str(word.get("punctuated_word") or word.get("word") or "").strip()
+        if not token:
+            continue
+        if current_words and speaker != current_speaker:
+            speaker_label = f"Speaker {int(current_speaker) + 1}" if isinstance(current_speaker, int) else f"Speaker {current_speaker}"
+            segments.append({"speaker": speaker_label, "text": " ".join(current_words), "start": current_start, "end": current_end})
+            current_words = []
+            current_start = None
+        if not current_words:
+            current_speaker = speaker
+            current_start = word.get("start")
+        current_words.append(token)
+        current_end = word.get("end")
+    if current_words:
+        speaker_label = f"Speaker {int(current_speaker) + 1}" if isinstance(current_speaker, int) else f"Speaker {current_speaker}"
+        segments.append({"speaker": speaker_label, "text": " ".join(current_words), "start": current_start, "end": current_end})
+    return segments
+
+
 def extract_slng_transcript(payload: dict[str, Any]) -> str:
+    speaker_segments = extract_slng_speaker_segments(payload)
+    if speaker_segments:
+        return "\n".join(f"{segment['speaker']}: {segment['text']}" for segment in speaker_segments)
+
     for key in ("text", "transcript"):
         value = payload.get(key)
         if isinstance(value, str) and value.strip():
@@ -586,7 +657,13 @@ def transcribe_audio_with_slng(
                 SLNG_STT_HTTP_URL,
                 headers={"Authorization": f"Bearer {settings.SLNG_API_KEY}"},
                 files={"audio": (upload_name, audio, upload_type)},
-                data={"language": selected_language},
+                data={
+                    "language": selected_language,
+                    "diarize": "true",
+                    "punctuate": "true",
+                    "smart_format": "true",
+                    "utterances": "true",
+                },
             )
             response.raise_for_status()
     except httpx.HTTPStatusError as error:
@@ -597,11 +674,13 @@ def transcribe_audio_with_slng(
 
     payload = response.json()
     transcript = extract_slng_transcript(payload)
+    speaker_segments = extract_slng_speaker_segments(payload)
     return {
         "provider": "SLNG",
         "mode": "slng-audio",
         "language": selected_language,
         "transcript": transcript,
+        "speaker_segments": speaker_segments,
         "raw": payload,
     }
 
@@ -618,7 +697,24 @@ def transcribe_audio_to_updates(
     result["mode"] = transcription["mode"]
     result["provider"] = transcription["provider"]
     result["transcript"] = transcription["transcript"]
+    result["speaker_segments"] = transcription["speaker_segments"]
     return result
+
+
+def contract_from_voice_notes(playbook_id: str, transcript: str, language: str = "en") -> dict[str, Any]:
+    if playbook_id not in store.playbooks:
+        raise ValueError("Playbook not found.")
+    notes = transcript.strip()
+    if not notes:
+        raise ValueError("Capture or paste speaker-separated notes before generating a contract.")
+
+    playbook = store.playbooks[playbook_id]
+    generated = draft_contract_from_notes(notes, playbook.name, playbook.category)
+    analysis = analyze_contract(playbook_id, generated["title"], generated["contract_text"])
+    analysis["mode"] = "openai-contract-from-notes"
+    analysis["language"] = normalize_language(language)
+    analysis["generated_contract"] = generated
+    return analysis
 
 
 def transcript_to_updates(playbook_id: str, transcript: str, language: str = "en") -> dict[str, Any]:

@@ -189,7 +189,10 @@ def test_voice_audio_upload_transcribes_with_slng_and_creates_updates(monkeypatc
             "provider": "SLNG",
             "mode": "slng-audio",
             "language": language,
-            "transcript": "Partner says residual knowledge should exclude pricing.",
+            "transcript": "Speaker 1: Partner says residual knowledge should exclude pricing.",
+            "speaker_segments": [
+                {"speaker": "Speaker 1", "text": "Partner says residual knowledge should exclude pricing."}
+            ],
             "raw": {"transcript": "Partner says residual knowledge should exclude pricing."},
         }
 
@@ -207,7 +210,67 @@ def test_voice_audio_upload_transcribes_with_slng_and_creates_updates(monkeypatc
     assert body["mode"] == "slng-audio"
     assert body["language"] == "nl"
     assert "residual knowledge" in body["transcript"]
+    assert body["speaker_segments"][0]["speaker"] == "Speaker 1"
     assert len(body["proposed_updates"]) >= 1
+
+
+def test_slng_diarization_words_become_speaker_separated_notes():
+    payload = {
+        "results": {
+            "channels": [
+                {
+                    "alternatives": [
+                        {
+                            "words": [
+                                {"word": "we", "speaker": 0, "start": 0.0, "end": 0.1},
+                                {"word": "need", "speaker": 0, "start": 0.1, "end": 0.3},
+                                {"word": "liability", "speaker": 1, "start": 0.4, "end": 0.8},
+                                {"word": "cap", "speaker": 1, "start": 0.8, "end": 1.0},
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+
+    assert services.extract_slng_transcript(payload) == "Speaker 1: we need\nSpeaker 2: liability cap"
+
+
+def test_voice_notes_generate_contract_and_analyze_with_openai(monkeypatch):
+    login("JUNIOR")
+    playbook = client.get("/api/playbooks").json()[0]
+
+    def fake_draft_contract_from_notes(notes, playbook_name, playbook_category):
+        assert "Speaker 1" in notes
+        assert playbook_name
+        assert playbook_category
+        return {
+            "title": "Generated Negotiation Agreement",
+            "contract_text": (
+                "Article 1. Scope. Supplier shall protect residual knowledge and exclude pricing. "
+                "Article 2. Confidentiality. Confidential information may not be disclosed without approval. "
+                "Article 3. Liability. Unlimited liability is rejected except for fraud."
+            ),
+        }
+
+    monkeypatch.setattr(services, "draft_contract_from_notes", fake_draft_contract_from_notes)
+
+    response = client.post(
+        "/api/voice/contract-from-notes",
+        json={
+            "playbook_id": playbook["id"],
+            "language": "en",
+            "transcript": "Speaker 1: We need residual knowledge to exclude pricing.\nSpeaker 2: Liability cap is required.",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "openai-contract-from-notes"
+    assert body["generated_contract"]["title"] == "Generated Negotiation Agreement"
+    assert body["contract"]["name"] == "Generated Negotiation Agreement"
+    assert body["findings"]
 
 
 def test_review_permissions_and_approval_commit_updates_graph():

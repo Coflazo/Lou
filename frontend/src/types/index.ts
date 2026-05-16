@@ -136,7 +136,14 @@ export interface VoiceTranscriptResponse {
   language: string;
   provider?: string;
   transcript?: string;
+  speaker_segments?: Array<{ speaker: string; text: string; start?: number; end?: number }>;
   proposed_updates: Proposal[];
+}
+
+export interface VoiceContractResponse extends AnalyzeResponse {
+  mode: string;
+  language: string;
+  generated_contract: { title: string; contract_text: string };
 }
 
 export interface VoiceSessionResponse {

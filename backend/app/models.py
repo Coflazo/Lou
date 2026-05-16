@@ -118,6 +118,12 @@ class VoiceTranscriptRequest(BaseModel):
     language: str = "en"
 
 
+class VoiceContractRequest(BaseModel):
+    playbook_id: str
+    transcript: str
+    language: str = "en"
+
+
 class ReviewActionRequest(BaseModel):
     edited_text: Optional[str] = None
     reason: Optional[str] = None

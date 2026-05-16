@@ -12,6 +12,7 @@ import type {
   Proposal,
   Role,
   VoiceSessionResponse,
+  VoiceContractResponse,
   VoiceTranscriptResponse,
 } from "@/types";
 
@@ -104,6 +105,11 @@ export const api = {
       throw error;
     }
   },
+  voiceContractFromNotes: (payload: { playbook_id: string; transcript: string; language?: string }) =>
+    request<VoiceContractResponse>("/api/voice/contract-from-notes", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
   listReview: () => request<Proposal[]>("/api/review"),
   approveProposal: (proposalId: string, editedText?: string | null) =>
     request<{ proposal: Proposal; commit: Commit }>(`/api/review/${proposalId}/approve`, {

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Microphone, Stop } from "@phosphor-icons/react";
 import { PageHeader } from "@/components/layout";
 import { Button, Select, Textarea } from "@/components/primitives";
 import { VoiceOrb, WaveformViz, TranscriptRoll, type TranscriptSegment } from "@/components/voice";
 import { ProposalCard } from "@/components/data";
-import { usePlaybooks, useVoiceAudioTranscript, useVoiceTranscript } from "@/hooks/useApi";
+import { usePlaybooks, useVoiceAudioTranscript, useVoiceContractFromNotes, useVoiceTranscript } from "@/hooks/useApi";
 import { useVoiceRecorder } from "@/hooks/useVoice";
 import { COPY } from "@/lib/constants";
 import type { Proposal } from "@/types";
@@ -21,7 +22,9 @@ export function VoiceSessionPage() {
   const playbooks = usePlaybooks();
   const transcribe = useVoiceTranscript();
   const transcribeAudio = useVoiceAudioTranscript();
+  const createContract = useVoiceContractFromNotes();
   const recorder = useVoiceRecorder();
+  const navigate = useNavigate();
   const lastTranscribedBlob = useRef<Blob | null>(null);
   const [playbookId, setPlaybookId] = useState<string>("");
   const [language, setLanguage] = useState<string>("en");
@@ -48,6 +51,12 @@ export function VoiceSessionPage() {
     ]);
   }
 
+  async function generateContractFromNotes() {
+    if (!playbookId || !transcript.trim()) return;
+    const response = await createContract.mutateAsync({ playbook_id: playbookId, transcript, language });
+    navigate(`/contracts/${response.contract.id}`);
+  }
+
   useEffect(() => {
     if (!playbookId || !recorder.blob || recorder.blob === lastTranscribedBlob.current) return;
     lastTranscribedBlob.current = recorder.blob;
@@ -57,10 +66,15 @@ export function VoiceSessionPage() {
         const spokenText = response.transcript?.trim();
         if (spokenText) {
           setTranscript(spokenText);
-          setSegments((current) => [
-            ...current,
-            { id: `seg-${Date.now()}`, text: spokenText, speaker: "You", ts: new Date().toLocaleTimeString() },
-          ]);
+          const speakerSegments = response.speaker_segments?.length
+            ? response.speaker_segments.map((segment, index) => ({
+                id: `seg-${Date.now()}-${index}`,
+                text: segment.text,
+                speaker: segment.speaker,
+                ts: new Date().toLocaleTimeString(),
+              }))
+            : [{ id: `seg-${Date.now()}`, text: spokenText, speaker: "Speaker 1", ts: new Date().toLocaleTimeString() }];
+          setSegments((current) => [...current, ...speakerSegments]);
         }
         setProposals(response.proposed_updates);
       })
@@ -96,6 +110,11 @@ export function VoiceSessionPage() {
             {transcribeAudio.error && (
               <p className="text-sm text-[color:var(--color-red)]">
                 {transcribeAudio.error instanceof Error ? transcribeAudio.error.message : "SLNG transcription failed."}
+              </p>
+            )}
+            {createContract.error && (
+              <p className="text-sm text-[color:var(--color-red)]">
+                {createContract.error instanceof Error ? createContract.error.message : "Contract generation failed."}
               </p>
             )}
             <div className="flex items-center justify-center gap-3">
@@ -139,6 +158,14 @@ export function VoiceSessionPage() {
           />
           <Button onClick={submit} loading={transcribe.isPending || transcribeAudio.isPending}>
             Create proposals
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={generateContractFromNotes}
+            loading={createContract.isPending}
+            disabled={!transcript.trim() || !playbookId}
+          >
+            Generate contract from notes
           </Button>
         </div>
       </section>

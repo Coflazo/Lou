@@ -148,6 +148,18 @@ export function useVoiceAudioTranscript() {
   });
 }
 
+export function useVoiceContractFromNotes() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: api.voiceContractFromNotes,
+    onSuccess: (data) => {
+      client.invalidateQueries({ queryKey: queryKeys.contracts });
+      client.invalidateQueries({ queryKey: queryKeys.contract(data.contract.id) });
+      client.invalidateQueries({ queryKey: queryKeys.review });
+    },
+  });
+}
+
 export function useCommand() {
   return useMutation({ mutationFn: api.command });
 }
