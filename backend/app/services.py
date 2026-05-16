@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import hashlib
 import json
+import logging
 import re
 import secrets
 import uuid
@@ -915,14 +916,25 @@ def transcribe_audio_with_slng(
     upload_name = filename or "lou-recording.webm"
     upload_type = content_type or "application/octet-stream"
 
+    # `model` must be explicit; SLNG/Deepgram falls back to "latest" which
+    # the Nova endpoint refuses. Sent as both form field and query string
+    # because SLNG's Nova proxy reads it from the query, while other
+    # upstream STT routes read it from the body.
+    request_model = settings.SLNG_STT_REQUEST_MODEL
+    stt_url = _slng_stt_http_url()
+    # Known-broken pattern: the slng/deepgram/nova:N-xx path makes the upstream
+    # bridge ignore our model param and default to "latest". Fall back to the
+    # working /v1/stt/deepgram/nova:N route automatically.
+    if "/v1/stt/slng/deepgram/" in stt_url:
+        repaired = stt_url.replace("/v1/stt/slng/deepgram/", "/v1/stt/deepgram/")
+        repaired = repaired.rsplit("-", 1)[0] if repaired.endswith(("-en", "-multi")) else repaired
+        logging.getLogger("lou.voice").warning(
+            "slng_stt_url_repaired", extra={"from_url": stt_url, "to_url": repaired},
+        )
+        stt_url = repaired
     try:
-        # `model` must be explicit; SLNG/Deepgram falls back to "latest" which
-        # the Nova endpoint refuses. Sent as both form field and query string
-        # because SLNG's Nova proxy reads it from the query, while other
-        # upstream STT routes read it from the body.
-        request_model = settings.SLNG_STT_REQUEST_MODEL
         response = httpx.post(
-            _slng_stt_http_url(),
+            stt_url,
             headers={"Authorization": f"Bearer {slng_key}"},
             params={"model": request_model},
             files={"audio": (upload_name, audio, upload_type)},
