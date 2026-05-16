@@ -27,18 +27,35 @@ class ApiError extends Error {
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const isFormData = init.body instanceof FormData;
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: isFormData
-      ? { ...(init.headers || {}) }
-      : { "Content-Type": "application/json", ...(init.headers || {}) },
-    ...init,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      headers: isFormData
+        ? { ...(init.headers || {}) }
+        : { "Content-Type": "application/json", ...(init.headers || {}) },
+      ...init,
+    });
+  } catch (error) {
+    // fetch() rejects (TypeError "Failed to fetch") on DNS, connection-refused,
+    // CORS, or network failures. Turn it into something a user can act on.
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new ApiError(0, `Could not reach the Lou backend at ${API_BASE}. ${reason}`);
+  }
   if (!response.ok) {
     const detail = await response.text();
     let message = detail;
     try {
-      const parsed = JSON.parse(detail) as { detail?: unknown };
-      if (typeof parsed.detail === "string") message = parsed.detail;
+      const parsed = JSON.parse(detail) as {
+        detail?: unknown;
+        error?: { code?: string; message?: string };
+      };
+      if (parsed?.error && typeof parsed.error.message === "string") {
+        message = parsed.error.message;
+      } else if (typeof parsed.detail === "string") {
+        message = parsed.detail;
+      } else if (parsed.detail) {
+        message = JSON.stringify(parsed.detail);
+      }
     } catch {
       // Keep the original response text when the backend does not return JSON.
     }

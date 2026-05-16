@@ -9,6 +9,7 @@ import { VoiceOrb, WaveformViz, TranscriptRoll, type TranscriptSegment } from "@
 import { ProposalCard } from "@/components/data";
 import { useCreateReviewProposal, usePlaybooks, useVoiceAudioTranscript, useVoiceContractFromNotes, useVoiceTranscript } from "@/hooks/useApi";
 import { useVoiceRecorder } from "@/hooks/useVoice";
+import { useUiStore } from "@/stores/uiStore";
 import { COPY, DEMO_TRANSCRIPT_FALLBACK, VOICE_LANGUAGES } from "@/lib/constants";
 import type { Proposal } from "@/types";
 
@@ -28,6 +29,7 @@ export function VoiceSessionPage() {
   const createReviewProposal = useCreateReviewProposal();
   const recorder = useVoiceRecorder();
   const navigate = useNavigate();
+  const pushToast = useUiStore((state) => state.pushToast);
   const lastTranscribedBlob = useRef<Blob | null>(null);
   const [playbookId, setPlaybookId] = useState<string>("");
   const [language, setLanguage] = useState<string>("en");
@@ -79,6 +81,8 @@ export function VoiceSessionPage() {
     transcribeAudio
       .mutateAsync({ playbook_id: playbookId, language, file: recorder.blob })
       .then((response) => {
+        const message = (response as { message?: string }).message;
+        if (message) pushToast(message);
         const spokenText = response.transcript?.trim();
         if (spokenText) {
           setTranscript(spokenText);

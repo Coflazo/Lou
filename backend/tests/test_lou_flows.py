@@ -310,6 +310,9 @@ def test_voice_transcript_creates_proposed_updates():
 def test_voice_audio_upload_transcribes_with_slng_and_creates_updates(monkeypatch):
     login("JUNIOR")
     playbook = client.get("/api/playbooks").json()[0]
+    # transcribe_audio_to_updates short-circuits to a friendly fallback when no
+    # SLNG key is present; this test exercises the SLNG path so we set one.
+    monkeypatch.setattr(services.settings, "SLNG_API_KEY", "env-slng-test")
 
     def fake_transcribe_audio_with_slng(audio, filename, content_type, language):
         assert audio == b"fake webm audio"

@@ -956,6 +956,22 @@ def transcribe_audio_to_updates(
     content_type: str | None,
     language: str = "en",
 ) -> dict[str, Any]:
+    # Graceful degradation: when no SLNG key is configured, return a 200 with an
+    # empty transcript and a clear message instead of bubbling a 502 to the UI.
+    # The Voice page already supports pasted-transcript fallback for this case.
+    if not current_slng_key(settings.SLNG_API_KEY):
+        return {
+            "mode": "transcript-fallback",
+            "provider": "none",
+            "language": normalize_language(language),
+            "transcript": "",
+            "speaker_segments": [],
+            "proposed_updates": [],
+            "message": (
+                "Live audio transcription is disabled because no SLNG key is configured."
+                " Paste the transcript below to create proposals."
+            ),
+        }
     transcription = transcribe_audio_with_slng(audio, filename, content_type, language)
     result = transcript_to_updates(playbook_id, transcription["transcript"], transcription["language"])
     result["mode"] = transcription["mode"]
