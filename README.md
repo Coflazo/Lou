@@ -210,7 +210,13 @@ Then run:
 python3 scripts/generate_lou_playbook_matrix.py --playbooks 50 --rows-per-playbook 50 --batch-size 5
 ```
 
-This makes 2,500 total playbook rows and writes:
+This makes 2,500 total playbook rows. Playbook specifications are requested in smaller batches by default to avoid oversized Pioneer responses. If Pioneer still returns malformed JSON, rerun with a smaller spec batch:
+
+```bash
+python3 scripts/generate_lou_playbook_matrix.py --playbooks 50 --rows-per-playbook 50 --batch-size 5 --spec-batch-size 5
+```
+
+The generator writes:
 
 - `demo-data/lou-pioneer-playbook-matrix-50x50.jsonl`
 - `demo-data/lou-pioneer-playbook-matrix-50x50.xlsx`

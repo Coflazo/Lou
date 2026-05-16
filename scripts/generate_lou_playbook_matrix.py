@@ -29,6 +29,7 @@ WORKBOOK_XLSX = DEMO_DATA / "lou-pioneer-playbook-matrix-50x50.xlsx"
 LEGACY_WORKBOOK_XLSX = DEMO_DATA / "siemens-mutual-nda-playbook.xlsx"
 PIONEER_CHAT_URL = "https://api.pioneer.ai/v1/chat/completions"
 DEFAULT_MODEL = "Qwen/Qwen3-8B"
+DEFAULT_SPEC_BATCH_SIZE = 10
 ROW_COLUMNS = [
     "Topic",
     "Preferred Position",
@@ -129,7 +130,12 @@ def pioneer_chat(messages: list[dict[str, str]], model: str, api_key: str, max_t
     return {"raw": body, "parsed": parse_json(str(content))}
 
 
-def generate_playbook_specs(count: int, model: str, api_key: str) -> tuple[list[dict[str, str]], dict[str, Any]]:
+def generate_playbook_specs(
+    count: int,
+    spec_batch_size: int,
+    model: str,
+    api_key: str,
+) -> tuple[list[dict[str, str]], dict[str, Any]]:
     validated = []
     names = set()
     attempts = []
@@ -143,7 +149,7 @@ def generate_playbook_specs(count: int, model: str, api_key: str) -> tuple[list[
         if request_index > max_requests:
             raise ValueError(f"Pioneer returned only {len(validated)} unique playbooks after {max_requests} requests, expected {count}.")
 
-        current = count - len(validated)
+        current = min(spec_batch_size, count - len(validated))
         messages = [
             {
                 "role": "system",
@@ -163,7 +169,30 @@ def generate_playbook_specs(count: int, model: str, api_key: str) -> tuple[list[
                 ),
             },
         ]
-        result = pioneer_chat(messages, model, api_key, max_tokens=8192)
+        try:
+            result = pioneer_chat(messages, model, api_key, max_tokens=8192)
+        except json.JSONDecodeError as error:
+            attempts.append(
+                {
+                    "request": request_index,
+                    "requested": current,
+                    "received": "invalid_json",
+                    "accepted": 0,
+                    "error": str(error),
+                }
+            )
+            empty_attempts += 1
+            if empty_attempts >= max_empty_attempts:
+                raise ValueError(
+                    f"Pioneer returned malformed playbook specs {empty_attempts} times; "
+                    f"accepted {len(validated)} of {count}. Try a smaller --spec-batch-size."
+                ) from error
+            print(
+                f"[pioneer] playbook specs returned malformed JSON; retrying {empty_attempts}/{max_empty_attempts}",
+                file=sys.stderr,
+            )
+            time.sleep(0.25)
+            continue
         playbooks = result["parsed"].get("playbooks", [])
         received = len(playbooks) if isinstance(playbooks, list) else "invalid"
         accepted = 0
@@ -361,8 +390,14 @@ def main() -> None:
     parser.add_argument("--playbooks", type=int, default=50)
     parser.add_argument("--rows-per-playbook", type=int, default=50)
     parser.add_argument("--batch-size", type=int, default=5)
+    parser.add_argument("--spec-batch-size", type=int, default=DEFAULT_SPEC_BATCH_SIZE)
     parser.add_argument("--model", default=DEFAULT_MODEL)
     args = parser.parse_args()
+
+    if args.spec_batch_size < 1:
+        raise SystemExit("--spec-batch-size must be at least 1.")
+    if args.batch_size < 1:
+        raise SystemExit("--batch-size must be at least 1.")
 
     api_key = load_keys().get("PIONEER_API_KEY", "")
     if not api_key and sys.stdin.isatty():
@@ -372,7 +407,7 @@ def main() -> None:
         suffix = f"\nCould not read key files:\n{detail}" if detail else ""
         raise SystemExit(f"Missing PIONEER_API_KEY. Refusing to generate non-Pioneer fallback data.{suffix}")
 
-    specs, specs_raw = generate_playbook_specs(args.playbooks, args.model, api_key)
+    specs, specs_raw = generate_playbook_specs(args.playbooks, args.spec_batch_size, args.model, api_key)
     outputs = []
     raw: dict[str, Any] = {"playbook_specs": specs_raw, "row_batches": []}
     for index, playbook in enumerate(specs, start=1):
