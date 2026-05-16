@@ -159,7 +159,7 @@ def test_voice_transcript_creates_proposed_updates():
     session = client.post("/api/voice/session", json={"playbook_id": playbook["id"], "language": "fr"}).json()
     assert session["language"] == "fr"
     assert set(session["supported_languages"]) == {"en", "fr", "nl", "de"}
-    assert "/v1/bridges/unmute/stt/slng/deepgram/nova:3-multi" in session["stt"]["websocket_url"]
+    assert "/v1/stt/deepgram/nova:3" in session["stt"]["websocket_url"]
     assert "/v1/bridges/unmute/tts/slng/rime/arcana:3-en" in session["tts"]["websocket_url"]
 
     response = client.post(

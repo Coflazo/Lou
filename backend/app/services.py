@@ -41,9 +41,9 @@ from .seeder import seed_all
 
 
 ROLE_RANK = {Role.JUNIOR: 1, Role.SENIOR: 2, Role.ADMIN: 3}
-SLNG_STT_MODEL = "slng/deepgram/nova:3-multi"
+SLNG_STT_MODEL = "deepgram/nova:3"
 SLNG_TTS_MODEL = "slng/rime/arcana:3-en"
-SLNG_STT_PATH = f"/v1/bridges/unmute/stt/{SLNG_STT_MODEL}"
+SLNG_STT_PATH = f"/v1/stt/{SLNG_STT_MODEL}"
 SLNG_TTS_PATH = f"/v1/bridges/unmute/tts/{SLNG_TTS_MODEL}"
 SLNG_STT_HTTP_URL = f"https://api.slng.ai{SLNG_STT_PATH}"
 SLNG_TTS_HTTP_URL = f"https://api.slng.ai{SLNG_TTS_PATH}"
