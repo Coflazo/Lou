@@ -64,19 +64,19 @@ def _slng_tts_path() -> str:
 
 
 def _slng_stt_http_url() -> str:
-    return f"{settings.SLNG_API_BASE_HTTP}{_slng_stt_path()}"
+    return settings.SLNG_STT_HTTP_URL or f"{settings.SLNG_API_BASE_HTTP}{_slng_stt_path()}"
 
 
 def _slng_tts_http_url() -> str:
-    return f"{settings.SLNG_API_BASE_HTTP}{_slng_tts_path()}"
+    return settings.SLNG_TTS_HTTP_URL or f"{settings.SLNG_API_BASE_HTTP}{_slng_tts_path()}"
 
 
 def _slng_stt_ws_url() -> str:
-    return f"{settings.SLNG_API_BASE_WS}{_slng_stt_path()}"
+    return settings.SLNG_STT_WS_URL or f"{settings.SLNG_API_BASE_WS}{_slng_stt_path()}"
 
 
 def _slng_tts_ws_url() -> str:
-    return f"{settings.SLNG_API_BASE_WS}{_slng_tts_path()}"
+    return settings.SLNG_TTS_WS_URL or f"{settings.SLNG_API_BASE_WS}{_slng_tts_path()}"
 
 
 @dataclass

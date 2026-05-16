@@ -41,6 +41,12 @@ class Settings(BaseSettings):
     SLNG_API_BASE_WS: str = "wss://api.slng.ai"
     SLNG_STT_MODEL: str = "deepgram/nova:3"
     SLNG_TTS_MODEL: str = "slng/rime/arcana:3-en"
+    # Optional direct overrides — when set, the full URL is used as-is instead
+    # of constructing one from SLNG_API_BASE_HTTP + SLNG_STT_MODEL.
+    SLNG_STT_HTTP_URL: str | None = None
+    SLNG_TTS_HTTP_URL: str | None = None
+    SLNG_STT_WS_URL: str | None = None
+    SLNG_TTS_WS_URL: str | None = None
     SLNG_TTS_SPEAKER: str = "luna"
     SLNG_TTS_SAMPLE_RATE: int = 24000
     SLNG_TTS_SPEED: float = 1.0
