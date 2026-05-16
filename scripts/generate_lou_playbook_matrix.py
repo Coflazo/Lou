@@ -40,6 +40,20 @@ ROW_COLUMNS = [
     "Deal Breaker",
 ]
 KEY_READ_ERRORS: list[str] = []
+ROW_RECOVERY_AREAS = [
+    "pre-contract diligence and onboarding",
+    "commercial pricing and payment operations",
+    "data governance and privacy operations",
+    "security controls and incident response",
+    "AI governance and model-risk controls",
+    "IP ownership, licensing, and restrictions",
+    "audit, reporting, and records access",
+    "termination, transition, and exit support",
+    "subcontracting and third-party dependencies",
+    "regulatory, export, and public-sector compliance",
+    "insurance, liability, indemnity, and remedies",
+    "cross-border, localization, and jurisdiction-specific issues",
+]
 
 
 def candidate_roots() -> list[Path]:
@@ -95,6 +109,36 @@ def load_keys() -> dict[str, str]:
 def slugify(value: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
     return slug[:54] or "playbook"
+
+
+def unique_topic(topic: str, signatures: set[str], playbook: dict[str, str], row_number: int) -> str:
+    base = topic.strip() or f"{playbook['name']} Position {row_number}"
+    signature = base.casefold()
+    if signature not in signatures:
+        signatures.add(signature)
+        return base
+
+    category = str(playbook.get("category") or "Commercial").strip()
+    for suffix in [
+        f"{category} Variant {row_number}",
+        f"Negotiation Edge Case {row_number}",
+        f"Fallback Scenario {row_number}",
+        f"Escalation Variant {row_number}",
+    ]:
+        candidate = f"{base} - {suffix}"
+        signature = candidate.casefold()
+        if signature not in signatures:
+            signatures.add(signature)
+            return candidate
+
+    counter = 2
+    while True:
+        candidate = f"{base} - Variant {row_number}.{counter}"
+        signature = candidate.casefold()
+        if signature not in signatures:
+            signatures.add(signature)
+            return candidate
+        counter += 1
 
 
 def parse_json(content: str) -> dict[str, Any]:
@@ -257,8 +301,10 @@ def generate_rows_for_playbook(
     while len(rows) < row_count:
         request_index += 1
         remaining = row_count - len(rows)
-        current = batch_size if remaining > batch_size else min(20, max(batch_size, remaining * 3))
+        recovery_mode = empty_attempts >= 3
+        current = max(batch_size, min(20, remaining * (4 if recovery_mode else 3)))
         existing_topics = [row["Topic"] for row in rows]
+        recovery_area = ROW_RECOVERY_AREAS[(request_index - 1) % len(ROW_RECOVERY_AREAS)]
         messages = [
             {
                 "role": "system",
@@ -279,6 +325,8 @@ def generate_rows_for_playbook(
                     "If this is late in the sequence, invent narrow non-overlapping subtopics, edge cases, exceptions, "
                     "jurisdictional variants, operational obligations, remedies, audit mechanics, notice mechanics, "
                     "or sector-specific positions instead of restating earlier topics. "
+                    f"Focus especially on {recovery_area}. "
+                    "Use highly specific Topic labels of 5 to 12 words. "
                     'Return only {"items":[{...}]}.'
                 ),
             },
@@ -319,10 +367,7 @@ def generate_rows_for_playbook(
             row = {column: str(item.get(column, "")).strip() for column in ROW_COLUMNS}
             if not all(row.values()):
                 continue
-            signature = row["Topic"].casefold()
-            if signature in signatures:
-                continue
-            signatures.add(signature)
+            row["Topic"] = unique_topic(row["Topic"], signatures, playbook, len(rows) + 1)
             rows.append(row)
             accepted += 1
             if len(rows) >= row_count:
