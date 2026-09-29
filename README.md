@@ -1,12 +1,12 @@
+# Lou
+
+Controlled legal memory for contracts, playbooks, voice notes, and approvals.
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="frontend/public/lou-wordmark-on-dark.png">
     <img alt="Lou" src="frontend/public/lou-wordmark-on-light.png" height="64">
   </picture>
-</p>
-
-<p align="center">
-  <strong>Controlled legal memory for contracts, playbooks, voice notes, and approvals.</strong>
 </p>
 
 <p align="center">
